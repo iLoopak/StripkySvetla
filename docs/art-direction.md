@@ -90,10 +90,11 @@ Every important character needs:
 - a controlled palette with one light accent;
 - a readable role before dialogue is opened.
 
-The player is an ordinary young courier: cream tunic, dark teal scarf, practical boots,
-warm chestnut hair, and a tiny gold lantern at the waist. Mila is a trusted festival
-steward: burgundy, dusty-rose, and terracotta layers, a tied-back bun, festival sash, and
-restrained gold detail. They must never become palette swaps.
+The player is an ordinary young courier: cream tunic, a long dark teal scarf with a
+restrained luminous mint tip, practical boots, warm chestnut hair, and a readable gold
+lantern at the waist. Mila is a trusted festival steward: burgundy, dusty-rose, and
+terracotta layers, a tied-back bun, festival sash, and restrained gold detail. They must
+never become palette swaps.
 
 ## Light motif rules
 
