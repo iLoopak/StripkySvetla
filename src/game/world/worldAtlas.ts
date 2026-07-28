@@ -144,7 +144,9 @@ export function selectDeterministicVariant(
 
   const quantizedX = Math.round(x * 1000);
   const quantizedZ = Math.round(z * 1000);
-  const hash = Math.imul(quantizedX, 73_856_093) ^ Math.imul(quantizedZ, 19_349_663);
+  let hash = Math.imul(quantizedX, 73_856_093) ^ Math.imul(quantizedZ, 19_349_663);
+  hash = Math.imul(hash ^ (hash >>> 16), 2_246_822_519);
+  hash ^= hash >>> 13;
   return (hash >>> 0) % variantCount;
 }
 
