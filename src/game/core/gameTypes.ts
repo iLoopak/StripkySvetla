@@ -9,7 +9,10 @@ export interface MovementDirection {
   z: number;
 }
 
+export type HorizontalFacing = "left" | "right";
+
 export interface CharacterAnimationState {
   elapsedSeconds: number;
   isMoving: boolean;
+  facing: HorizontalFacing;
 }

@@ -86,9 +86,17 @@ export type CharacterHairStyle = "courier-hood" | "festival-bun";
 export type CharacterOutfitStyle = "courier-tunic" | "festival-steward";
 export type CharacterAccessory = "scarf" | "light-pendant" | "sash" | "festival-brooch";
 
+export interface CharacterSpriteDefinition {
+  assetPath: string;
+  pixelWidth: number;
+  pixelHeight: number;
+  worldHeight: number;
+}
+
 export interface CharacterDefinition {
   id: string;
   displayName: string;
+  sprite: CharacterSpriteDefinition;
   palette: {
     primary: string;
     secondary: string;

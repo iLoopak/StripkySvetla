@@ -18,6 +18,21 @@ export function validateCharacterVisual(
     errors.push("Character proportions must be positive.");
   }
   if (
+    !definition.sprite.assetPath.startsWith("/assets/characters/") ||
+    !definition.sprite.assetPath.endsWith(".png")
+  ) {
+    errors.push("Character sprites must use a project-local PNG asset.");
+  }
+  if (
+    !Number.isInteger(definition.sprite.pixelWidth) ||
+    !Number.isInteger(definition.sprite.pixelHeight) ||
+    definition.sprite.pixelWidth <= 0 ||
+    definition.sprite.pixelHeight <= 0 ||
+    definition.sprite.worldHeight <= 0
+  ) {
+    errors.push("Character sprite dimensions must be positive.");
+  }
+  if (
     new Set(definition.accessories).size !== definition.accessories.length ||
     definition.accessories.length > 2
   ) {
@@ -32,6 +47,7 @@ export function characterVisualSignature(definition: CharacterDefinition): strin
     definition.hairStyle,
     definition.outfitStyle,
     ...definition.accessories,
+    definition.sprite.assetPath,
     definition.palette.primary,
     definition.palette.accent,
   ].join("|");

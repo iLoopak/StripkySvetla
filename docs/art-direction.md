@@ -10,7 +10,7 @@ textures, heavy effects, or ornate fantasy decoration.
 ## Visual pillars
 
 1. Light is the narrative and visual anchor.
-2. Important characters read as compact voxel JRPG silhouettes.
+2. Important humanoid characters read as compact 2D pixel-art silhouettes in the 3D world.
 3. UI uses deep petrol surfaces instead of generic black cards.
 4. Mint and gold identify magical and human-made light.
 5. Fantasy presentation stays clean, quiet, and immediately readable.
@@ -57,13 +57,28 @@ lantern frame**. Reuse these forms in objectives, interactions, feedback, shrine
 sparks, and character light details. Corners may be lightly cut or offset, but frames
 must remain simple.
 
-## Character proportions
+## Sprite characters
 
-- Heads are slightly larger than natural proportions, but not bobblehead-sized.
-- Bodies are compact and broad enough to read at the isometric camera distance.
-- Legs are short, with readable foot depth and a stable grid footprint.
-- Arms support a clear walk cycle without becoming thin sticks.
-- Faces stay minimal; silhouette, outfit blocks, and color carry identity.
+Humanoid characters use 2D pixel-art sprites because the sharper silhouette and authored
+outfit details give them a stronger identity against the simple voxel environment. The
+hybrid should feel intentional: characters remain grounded in the 3D space by scale,
+baseline, billboard behavior, and a restrained procedural shadow.
+
+Rules for every new humanoid NPC sprite:
+
+- use one transparent PNG on a canvas around `64 × 96 px`;
+- draw one full-body character in side view, facing right, with feet on a shared baseline;
+- keep hard pixel edges, a limited palette, clean alpha, and no baked shadow;
+- use a compact, lightly chibi proportion while preserving a teen or adult role;
+- make hair, outfit, and at most two signature accessories readable at gameplay distance;
+- mirror the same sprite for left-facing movement and preserve the last horizontal facing
+  for screen-vertical movement;
+- animate with subtle transform-based idle and walk motion, not a sprite sheet;
+- validate the sprite in the gameplay camera, including after camera rotation.
+
+Do not use portraits, smooth illustration rendering, Minecraft-skin proportions, large
+props, white or black matte edges, or generated assets that have not been reviewed and
+normalized for the project.
 
 ## Important characters
 
@@ -75,9 +90,10 @@ Every important character needs:
 - a controlled palette with one light accent;
 - a readable role before dialogue is opened.
 
-The player is an ordinary young courier: dark teal tunic, cream scarf, practical hood,
-and a warm pendant. Mila is a trusted festival steward: burgundy and terracotta
-layers, festival bun, gold sash, and brooch. They must never become palette swaps.
+The player is an ordinary young courier: cream tunic, dark teal scarf, practical boots,
+warm chestnut hair, and a tiny gold lantern at the waist. Mila is a trusted festival
+steward: burgundy, dusty-rose, and terracotta layers, a tied-back bun, festival sash, and
+restrained gold detail. They must never become palette swaps.
 
 ## Light motif rules
 
@@ -117,7 +133,7 @@ Do:
 
 Do not:
 
-- add imported textures, models, webfonts, or icon sets;
+- add unreviewed third-party textures, models, webfonts, or icon sets;
 - use pure white as the main light color;
 - surround every panel with fantasy metalwork;
 - add bloom-heavy post-processing;
@@ -127,7 +143,9 @@ Do not:
 ## Rules for future content
 
 - Extend typed content only for visuals the wave actually uses.
-- Reuse the character factory before adding a one-off model path.
+- Reuse the sprite character factory before adding a one-off visual path.
+- Keep future humanoid sprites on the shared side-view, facing-right, transparent-PNG
+  convention unless the project explicitly changes direction.
 - Select a primary silhouette feature and at most two accessories per important NPC.
 - Add world details through authored visual data and shared procedural renderers.
 - Preserve the mint/gold meaning and the split-shard/lantern vocabulary.
@@ -135,7 +153,9 @@ Do not:
 
 ## Visual checklist for future waves
 
-- [ ] Important characters are distinguishable in silhouette at gameplay distance.
+- [ ] Important character sprites are distinguishable in silhouette at gameplay distance.
+- [ ] Sprite alpha, baseline, nearest-neighbor sampling, billboard behavior, and facing
+      remain correct.
 - [ ] New UI uses existing tokens and remains readable on narrow and short viewports.
 - [ ] Magical light is mint, lantern warmth is gold, and neither clips to white.
 - [ ] Split-shard or lantern motifs are reused consistently.

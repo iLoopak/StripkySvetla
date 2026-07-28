@@ -12,9 +12,11 @@ import {
   type InteractionTarget,
 } from "../interaction/InteractionSystem";
 import { InputManager, movementForInputMode } from "../input/InputManager";
+import { resolveHorizontalFacing } from "../characters/characterFacing";
 import { createWave1Scene, type RenderedEntity } from "../scenes/createWave1Scene";
 import { dialogueForNpc } from "../story/storyMachine";
 import { resolveMapMovement, type CircularBlocker } from "../world/mapCollision";
+import type { HorizontalFacing } from "./gameTypes";
 
 const PLAYER_SPEED = 3.5;
 const TELEMETRY_INTERVAL_MS = 250;
@@ -28,6 +30,7 @@ export class GameRuntime {
   private elapsedSeconds = 0;
   private telemetryElapsedMs = TELEMETRY_INTERVAL_MS;
   private cameraControlsAttached = true;
+  private playerFacing: HorizontalFacing = "right";
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -113,11 +116,18 @@ export class GameRuntime {
       const next = resolveMapMovement(jasnovOutskirts, current, candidate, this.blockers);
       characterRoot.position.set(next.x, next.y, next.z);
       characterRoot.rotation.y = Math.atan2(movement.x, movement.z);
+      const screenRight = this.sceneBundle.camera.getDirection(Vector3.Right());
+      this.playerFacing = resolveHorizontalFacing(
+        movement,
+        { x: screenRight.x, z: screenRight.z },
+        this.playerFacing,
+      );
     }
 
     this.sceneBundle.player.animate({
       elapsedSeconds: this.elapsedSeconds,
       isMoving,
+      facing: this.playerFacing,
     });
     this.sceneBundle.entities.forEach((entity) => entity.animate(this.elapsedSeconds));
 
@@ -222,6 +232,14 @@ export class GameRuntime {
     const directionX = playerPosition.x - visual.root.position.x;
     const directionZ = playerPosition.z - visual.root.position.z;
     visual.root.rotation.y = Math.atan2(directionX, directionZ);
+    const screenRight = this.sceneBundle.camera.getDirection(Vector3.Right());
+    visual.setFacing?.(
+      resolveHorizontalFacing(
+        { x: directionX, z: directionZ },
+        { x: screenRight.x, z: screenRight.z },
+        "right",
+      ),
+    );
     state.openDialogue(dialogueId);
   }
 

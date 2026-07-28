@@ -3,6 +3,12 @@ import type { CharacterDefinition } from "../types";
 export const playerCharacter: CharacterDefinition = {
   id: "light-bearer",
   displayName: "Poutník",
+  sprite: {
+    assetPath: "/assets/characters/player.png",
+    pixelWidth: 64,
+    pixelHeight: 96,
+    worldHeight: 2.35,
+  },
   palette: {
     primary: "#285565",
     secondary: "#d9d0b9",
@@ -27,6 +33,12 @@ export const playerCharacter: CharacterDefinition = {
 export const milaCharacter: CharacterDefinition = {
   id: "mila",
   displayName: "Mila",
+  sprite: {
+    assetPath: "/assets/characters/mila.png",
+    pixelWidth: 64,
+    pixelHeight: 96,
+    worldHeight: 2.35,
+  },
   palette: {
     primary: "#87485b",
     secondary: "#c66e65",
