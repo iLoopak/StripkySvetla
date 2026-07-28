@@ -1,0 +1,67 @@
+:root {
+  color: #f4eee2;
+  background: #132b34;
+  color-scheme: dark;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --color-bg-deep: #132b34;
+  --color-bg-panel: #10242b;
+  --color-bg-panel-soft: #18333c;
+  --color-bg-panel-raised: #1d3d44;
+  --color-text-primary: #f4eee2;
+  --color-text-secondary: #b8d5d0;
+  --color-text-muted: #819f9b;
+  --color-border-soft: rgb(var(--rgb-light-mint) / 18%);
+  --color-border-strong: rgb(var(--rgb-light-mint) / 34%);
+  --color-light-mint: #a8eadb;
+  --color-light-mint-soft: #79c8ba;
+  --color-light-gold: #f6d58a;
+  --color-light-gold-soft: #caa45c;
+  --color-success: #8ed8ad;
+  --color-danger: #df9185;
+  --color-disabled: #627b78;
+  --color-focus: #ffe3a5;
+  --rgb-light-mint: 168 234 219;
+  --rgb-light-gold: 246 213 138;
+  --rgb-text-secondary: 184 213 208;
+  --rgb-success: 142 216 173;
+  --rgb-shadow: 4 16 21;
+
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-ui:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-debug: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.35rem;
+  --space-6: 1.75rem;
+
+  --radius-small: 0.38rem;
+  --radius-medium: 0.72rem;
+  --radius-large: 1rem;
+  --radius-pill: 999px;
+
+  --shadow-panel: 0 18px 42px rgb(var(--rgb-shadow) / 28%);
+  --shadow-soft: 0 8px 24px rgb(var(--rgb-shadow) / 18%);
+  --glow-mint: 0 0 22px rgb(126 222 203 / 20%);
+  --glow-gold: 0 0 18px rgb(var(--rgb-light-gold) / 18%);
+
+  --transition-fast: 140ms;
+  --transition-medium: 220ms;
+  --transition-slow: 360ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --hud-gutter: clamp(1rem, 2.6vw, 2rem);
+}

@@ -19,6 +19,7 @@ import {
 import { createLightSpark, type LightSpark } from "../entities/createLightSpark";
 import { createWorldMap, type RenderedWorldMap } from "../world/createWorldMap";
 import { findTerrainCell } from "../world/mapCollision";
+import { worldVisualPalette } from "../visual/visualPalette";
 
 export interface RenderedEntity {
   definition: NpcEntityDefinition | CollectibleEntityDefinition;
@@ -91,19 +92,19 @@ export interface Wave1Scene {
 
 export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wave1Scene {
   const scene = new Scene(engine);
-  scene.clearColor = Color4.FromHexString("#172b35ff");
-  scene.ambientColor = Color3.FromHexString("#344852");
+  scene.clearColor = Color4.FromHexString(`${worldVisualPalette.sky}ff`);
+  scene.ambientColor = Color3.FromHexString(worldVisualPalette.ambient);
 
   const camera = new ArcRotateCamera(
     "IsometricCamera",
     -Math.PI / 4,
     Math.PI / 3.25,
-    22,
+    20.5,
     new Vector3(0, 0.6, 0),
     scene,
   );
-  camera.lowerRadiusLimit = 13;
-  camera.upperRadiusLimit = 30;
+  camera.lowerRadiusLimit = 12.5;
+  camera.upperRadiusLimit = 28;
   camera.lowerBetaLimit = 0.55;
   camera.upperBetaLimit = 1.25;
   camera.wheelPrecision = 45;
@@ -113,9 +114,9 @@ export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wav
   camera.attachControl(canvas, true);
 
   const skyLight = new HemisphericLight("SkyLight", new Vector3(-0.4, 1, -0.25), scene);
-  skyLight.diffuse = Color3.FromHexString("#fff1d2");
-  skyLight.groundColor = Color3.FromHexString("#243b4b");
-  skyLight.intensity = 1.45;
+  skyLight.diffuse = Color3.FromHexString(worldVisualPalette.skyLight);
+  skyLight.groundColor = Color3.FromHexString(worldVisualPalette.groundLight);
+  skyLight.intensity = 1.05;
 
   const world = createWorldMap(scene, jasnovOutskirts);
   const player = createBlockCharacter(scene, playerCharacter, "player");
@@ -137,9 +138,9 @@ export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wav
   });
 
   scene.fogMode = Scene.FOGMODE_LINEAR;
-  scene.fogColor = Color3.FromHexString("#172b35");
-  scene.fogStart = 24;
-  scene.fogEnd = 42;
+  scene.fogColor = Color3.FromHexString(worldVisualPalette.fog);
+  scene.fogStart = 22;
+  scene.fogEnd = 38;
 
   return {
     scene,

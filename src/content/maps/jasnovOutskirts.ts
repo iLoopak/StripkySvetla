@@ -1,6 +1,7 @@
 import type {
   DecorationEntityDefinition,
   InteractionDefinition,
+  SignatureDetailDefinition,
   TerrainCellDefinition,
   WorldEntityDefinition,
   WorldMapDefinition,
@@ -122,6 +123,52 @@ const interactions: readonly InteractionDefinition[] = [
   },
 ];
 
+const visualDetails: readonly SignatureDetailDefinition[] = [
+  ...[
+    [-1.8, 5],
+    [-2.2, 2.5],
+    [-5, -4],
+  ].map(([x, z], index): SignatureDetailDefinition => ({
+    id: `path-lantern-${index + 1}`,
+    kind: "path-lantern",
+    position: { x, z },
+  })),
+  ...[
+    [-3, -3],
+    [-1, -4],
+    [3, -2],
+    [3, 2],
+    [1, 4],
+  ].map(([x, z], index): SignatureDetailDefinition => ({
+    id: `light-flower-${index + 1}`,
+    kind: "light-flower",
+    position: { x, z },
+  })),
+  {
+    id: "shard-marker-west",
+    kind: "shard-marker",
+    position: { x: -6, z: 3.5 },
+    facing: Math.PI * 0.2,
+  },
+  {
+    id: "shard-marker-south",
+    kind: "shard-marker",
+    position: { x: 4, z: -4 },
+    facing: -Math.PI * 0.25,
+  },
+  ...[
+    [-1.45, 0],
+    [1.45, 0],
+    [0, -1.45],
+    [0, 1.45],
+  ].map(([x, z], index): SignatureDetailDefinition => ({
+    id: `shrine-paving-${index + 1}`,
+    kind: "shrine-paving",
+    position: { x, z },
+    facing: Math.PI * 0.25,
+  })),
+];
+
 export const jasnovOutskirts: WorldMapDefinition = {
   id: "jasnov-outskirts",
   name: "Okraj Jasnovy",
@@ -131,4 +178,5 @@ export const jasnovOutskirts: WorldMapDefinition = {
   terrain: createTerrain(),
   entities,
   interactions,
+  visualDetails,
 };

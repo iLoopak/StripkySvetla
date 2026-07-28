@@ -1,5 +1,6 @@
 import { dialoguesById } from "../content/dialogues/wave1Dialogues";
 import { useGameStore } from "../state/gameStore";
+import { LightShardMark } from "./LightShardMark";
 
 export function DialogueOverlay() {
   const dialogueId = useGameStore((state) => state.activeDialogueId);
@@ -16,8 +17,12 @@ export function DialogueOverlay() {
   return (
     <section className="dialogue-layer" role="dialog" aria-modal="true">
       <div className="dialogue-panel">
+        <span className="dialogue-corner" aria-hidden="true" />
         <div className="dialogue-heading">
-          <p className="dialogue-speaker">{dialogue.speakerName}</p>
+          <div className="dialogue-speaker-lockup">
+            <LightShardMark className="light-shard-mark--dialogue" />
+            <p className="dialogue-speaker">{dialogue.speakerName}</p>
+          </div>
           <span className="dialogue-progress">
             {lineIndex + 1} / {dialogue.lines.length}
           </span>
@@ -28,7 +33,8 @@ export function DialogueOverlay() {
             <kbd>E</kbd> / <kbd>Enter</kbd>
           </span>
           <button type="button" onClick={() => advanceDialogue(dialogue.lines.length)}>
-            {isLastLine ? "Dokončit" : "Pokračovat"}
+            <span>{isLastLine ? "Dokončit" : "Pokračovat"}</span>
+            <i aria-hidden="true" />
           </button>
         </div>
       </div>

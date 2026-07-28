@@ -1,4 +1,4 @@
-# Wave 1 architecture
+# Wave 1.5 architecture
 
 ## Runtime boundaries
 
@@ -21,7 +21,8 @@ updated every frame.
 `src/content` contains typed definitions for:
 
 - the Jasnov outskirts map, terrain cells, spawn, and entities;
-- player and NPC character palettes;
+- player and NPC character palettes, proportions, hair, outfits, and signature accessories;
+- procedural signature environment details that do not participate in gameplay;
 - Wave 1 dialogue lines;
 - story-stage objective text;
 - interaction prompts and availability.
@@ -29,6 +30,24 @@ updated every frame.
 The world renderer consumes `WorldMapDefinition`. A future second map can be
 added as a new definition without duplicating scene setup. Wave 1 intentionally
 does not add map loading, transitions, an editor, or server-provided content.
+
+## Visual layer
+
+The visual pass keeps presentation data separate from gameplay:
+
+- `src/styles/tokens.css` is the central UI color, spacing, radius, shadow, glow,
+  typography, focus, and motion source;
+- `src/styles/components.css` applies those tokens to the HUD and dialogue;
+- `src/game/visual/visualPalette.ts` is the restrained Babylon scene palette;
+- character content selects only the proportions, palette, hair, outfit, and two
+  signature accessories used by the current cast;
+- the shared character factory turns those definitions into procedural models and
+  retains one animation path for the player and Mila;
+- map `visualDetails` drive instanced lanterns, flowers, markers, and paving without
+  becoming colliders or interaction targets.
+
+The development HUD may read telemetry, while production rendering omits the debug
+panel. Telemetry remains in Zustand for diagnostics and future tooling.
 
 ## Entity and interaction flow
 
@@ -92,7 +111,8 @@ Idempotent cleanup keeps Strict Mode and hot reload safe.
 
 ## Foundation for later Waves
 
-Wave 1 establishes reusable content, interaction, story-event, dialogue, and
-objective boundaries without creating a full quest engine or ECS. A later Wave
+Wave 1.5 establishes reusable content, interaction, story-event, dialogue, objective,
+and visual identity boundaries without creating a full quest engine, ECS, or design
+system framework. A later Wave
 can add another NPC, a small dialogue choice, or a second map by extending the
 appropriate content and focused runtime capability.
