@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { directionFromKeys } from "./InputManager";
+import { directionFromKeys, movementForInputMode } from "./InputManager";
 
 describe("directionFromKeys", () => {
   it("maps WASD and arrow keys to the same directions", () => {
@@ -16,5 +16,21 @@ describe("directionFromKeys", () => {
 
   it("cancels opposing keys", () => {
     expect(directionFromKeys(new Set(["KeyA", "KeyD"]))).toEqual({ x: 0, z: 0 });
+  });
+});
+
+describe("movementForInputMode", () => {
+  it("blocks movement while a dialogue is open", () => {
+    expect(movementForInputMode({ x: 1, z: -1 }, "dialogue")).toEqual({
+      x: 0,
+      z: 0,
+    });
+  });
+
+  it("keeps movement enabled in world mode", () => {
+    expect(movementForInputMode({ x: 0.5, z: -0.5 }, "world")).toEqual({
+      x: 0.5,
+      z: -0.5,
+    });
   });
 });

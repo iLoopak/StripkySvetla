@@ -5,6 +5,7 @@ import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import type { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 import type { Scene } from "@babylonjs/core/scene";
+import type { CharacterDefinition } from "../../content/types";
 import type { CharacterAnimationState } from "../core/gameTypes";
 
 function material(name: string, color: string, scene: Scene): StandardMaterial {
@@ -32,17 +33,31 @@ export interface BlockCharacter {
   animate: (state: CharacterAnimationState) => void;
 }
 
-export function createBlockCharacter(scene: Scene): BlockCharacter {
-  const root = new TransformNode("CharacterRoot", scene);
-  const bodyMaterial = material("character-cloak", "#355d78", scene);
-  const skinMaterial = material("character-skin", "#efc39f", scene);
-  const hairMaterial = material("character-hair", "#3d2b35", scene);
-  const bootMaterial = material("character-boots", "#4a3740", scene);
-  const lampMaterial = material("character-lamp", "#f3c969", scene);
-  lampMaterial.emissiveColor = Color3.FromHexString("#d6944d").scale(0.45);
+export function createBlockCharacter(
+  scene: Scene,
+  definition: CharacterDefinition,
+  instanceName = definition.id,
+): BlockCharacter {
+  const root = new TransformNode(`${instanceName}-CharacterRoot`, scene);
+  const bodyMaterial = material(
+    `${instanceName}-clothing`,
+    definition.palette.clothing,
+    scene,
+  );
+  const skinMaterial = material(`${instanceName}-skin`, definition.palette.skin, scene);
+  const hairMaterial = material(`${instanceName}-hair`, definition.palette.hair, scene);
+  const bootMaterial = material(`${instanceName}-boots`, definition.palette.boots, scene);
+  const accentMaterial = material(
+    `${instanceName}-accent`,
+    definition.palette.accent,
+    scene,
+  );
+  accentMaterial.emissiveColor = definition.hasLamp
+    ? Color3.FromHexString(definition.palette.accent).scale(0.45)
+    : Color3.Black();
 
   const body = part(
-    "Body",
+    `${instanceName}-Body`,
     { width: 0.72, height: 0.86, depth: 0.42 },
     bodyMaterial,
     root,
@@ -51,7 +66,7 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   body.position.y = 1.15;
 
   const head = part(
-    "Head",
+    `${instanceName}-Head`,
     { width: 0.64, height: 0.64, depth: 0.6 },
     skinMaterial,
     root,
@@ -60,7 +75,7 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   head.position.y = 1.9;
 
   const hair = part(
-    "Hair",
+    `${instanceName}-Hair`,
     { width: 0.7, height: 0.24, depth: 0.66 },
     hairMaterial,
     root,
@@ -68,8 +83,28 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   );
   hair.position.y = 2.22;
 
+  if (definition.hairStyle === "bun") {
+    const bun = part(
+      `${instanceName}-HairBun`,
+      { width: 0.38, height: 0.38, depth: 0.38 },
+      hairMaterial,
+      root,
+      scene,
+    );
+    bun.position.set(0, 2.3, 0.25);
+
+    const apron = part(
+      `${instanceName}-Apron`,
+      { width: 0.48, height: 0.58, depth: 0.08 },
+      accentMaterial,
+      root,
+      scene,
+    );
+    apron.position.set(0, 1.08, -0.25);
+  }
+
   const leftArm = part(
-    "LeftArm",
+    `${instanceName}-LeftArm`,
     { width: 0.22, height: 0.75, depth: 0.28 },
     bodyMaterial,
     root,
@@ -79,7 +114,7 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   leftArm.setPivotPoint(new Vector3(0, 0.32, 0));
 
   const rightArm = part(
-    "RightArm",
+    `${instanceName}-RightArm`,
     { width: 0.22, height: 0.75, depth: 0.28 },
     bodyMaterial,
     root,
@@ -89,7 +124,7 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   rightArm.setPivotPoint(new Vector3(0, 0.32, 0));
 
   const leftLeg = part(
-    "LeftLeg",
+    `${instanceName}-LeftLeg`,
     { width: 0.27, height: 0.62, depth: 0.32 },
     bootMaterial,
     root,
@@ -99,7 +134,7 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   leftLeg.setPivotPoint(new Vector3(0, 0.26, 0));
 
   const rightLeg = part(
-    "RightLeg",
+    `${instanceName}-RightLeg`,
     { width: 0.27, height: 0.62, depth: 0.32 },
     bootMaterial,
     root,
@@ -108,14 +143,16 @@ export function createBlockCharacter(scene: Scene): BlockCharacter {
   rightLeg.position.set(0.2, 0.42, 0);
   rightLeg.setPivotPoint(new Vector3(0, 0.26, 0));
 
-  const lamp = part(
-    "TravelLamp",
-    { width: 0.22, height: 0.28, depth: 0.18 },
-    lampMaterial,
-    root,
-    scene,
-  );
-  lamp.position.set(0.55, 0.8, 0.08);
+  if (definition.hasLamp) {
+    const lamp = part(
+      `${instanceName}-TravelLamp`,
+      { width: 0.22, height: 0.28, depth: 0.18 },
+      accentMaterial,
+      root,
+      scene,
+    );
+    lamp.position.set(0.55, 0.8, 0.08);
+  }
 
   return {
     root,
