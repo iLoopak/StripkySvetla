@@ -18,3 +18,8 @@
 - Keep authored map, entity, interaction, dialogue, and objective content separate from
   Babylon runtime code.
 - Route new proximity interactions through the shared interaction system.
+- Give every important character a recognizable silhouette, not only a different palette.
+- Treat light, lanterns, and split shards as the primary recurring visual motifs.
+- Build new UI from the centralized design tokens instead of repeating visual constants.
+- Keep glow restrained and avoid ornate fantasy frames that compete with gameplay.
+- Preserve gameplay clarity and performance when adding visual polish.

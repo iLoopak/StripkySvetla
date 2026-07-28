@@ -42,6 +42,16 @@ export interface DecorationEntityDefinition extends BaseEntityDefinition {
 export type WorldEntityDefinition =
   NpcEntityDefinition | CollectibleEntityDefinition | DecorationEntityDefinition;
 
+export type SignatureDetailKind =
+  "path-lantern" | "light-flower" | "shard-marker" | "shrine-paving";
+
+export interface SignatureDetailDefinition {
+  id: string;
+  kind: SignatureDetailKind;
+  position: GridPosition;
+  facing?: number;
+}
+
 export interface InteractionDefinition {
   id: string;
   type: "dialogue" | "collect";
@@ -60,20 +70,37 @@ export interface WorldMapDefinition {
   terrain: readonly TerrainCellDefinition[];
   entities: readonly WorldEntityDefinition[];
   interactions: readonly InteractionDefinition[];
+  visualDetails: readonly SignatureDetailDefinition[];
 }
+
+export interface CharacterProportions {
+  bodyWidth: number;
+  bodyHeight: number;
+  headSize: number;
+  armLength: number;
+  legHeight: number;
+  footDepth: number;
+}
+
+export type CharacterHairStyle = "courier-hood" | "festival-bun";
+export type CharacterOutfitStyle = "courier-tunic" | "festival-steward";
+export type CharacterAccessory = "scarf" | "light-pendant" | "sash" | "festival-brooch";
 
 export interface CharacterDefinition {
   id: string;
   displayName: string;
   palette: {
-    clothing: string;
+    primary: string;
+    secondary: string;
     skin: string;
     hair: string;
     boots: string;
     accent: string;
   };
-  hairStyle: "cap" | "bun";
-  hasLamp: boolean;
+  proportions: CharacterProportions;
+  hairStyle: CharacterHairStyle;
+  outfitStyle: CharacterOutfitStyle;
+  accessories: readonly CharacterAccessory[];
 }
 
 export interface DialogueDefinition {

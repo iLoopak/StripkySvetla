@@ -1,4 +1,5 @@
 import { useGameStore } from "../state/gameStore";
+import { LightShardMark } from "./LightShardMark";
 
 export function LoadingScreen() {
   const status = useGameStore((state) => state.status);
@@ -10,7 +11,9 @@ export function LoadingScreen() {
 
   return (
     <section className={`loading-screen loading-screen--${status}`} role="status">
-      <div className="loading-crystal" aria-hidden="true" />
+      <div className="loading-crystal" aria-hidden="true">
+        <LightShardMark className="light-shard-mark--loading" />
+      </div>
       {status === "booting" ? (
         <>
           <p className="eyebrow">Střípky světla</p>

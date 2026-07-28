@@ -8,6 +8,7 @@ import type { Mesh } from "@babylonjs/core/Meshes/mesh";
 import type { Observer } from "@babylonjs/core/Misc/observable";
 import type { Scene } from "@babylonjs/core/scene";
 import type { GridPosition } from "../../content/types";
+import { worldVisualPalette } from "../visual/visualPalette";
 
 export interface LightSpark {
   root: TransformNode;
@@ -25,27 +26,46 @@ export function createLightSpark(
   const root = new TransformNode(`${id}-root`, scene);
   root.position.set(position.x, terrainHeight, position.z);
   const material = new StandardMaterial(`${id}-material`, scene);
-  material.diffuseColor = Color3.FromHexString("#c9fff1");
-  material.emissiveColor = Color3.FromHexString("#87ead8");
+  material.diffuseColor = Color3.FromHexString(worldVisualPalette.mintLight);
+  material.emissiveColor = Color3.FromHexString(worldVisualPalette.mintLight).scale(0.72);
   material.specularColor = Color3.Black();
+  const warmMaterial = new StandardMaterial(`${id}-warm-material`, scene);
+  warmMaterial.diffuseColor = Color3.FromHexString(worldVisualPalette.goldLight);
+  warmMaterial.emissiveColor = Color3.FromHexString(worldVisualPalette.goldLight).scale(
+    0.58,
+  );
+  warmMaterial.specularColor = Color3.Black();
 
-  const core = MeshBuilder.CreatePolyhedron(`${id}-core`, { type: 1, size: 0.36 }, scene);
+  const core = MeshBuilder.CreatePolyhedron(`${id}-core`, { type: 1, size: 0.34 }, scene);
   core.material = material;
-  core.scaling.y = 1.35;
+  core.scaling.y = 1.45;
   core.position.y = 0.9;
+  core.position.x = -0.08;
+  core.rotation.z = 0.16;
   core.parent = root;
 
-  const motes = Array.from({ length: 5 }, (_, index) => {
+  const warmShard = MeshBuilder.CreatePolyhedron(
+    `${id}-warm-shard`,
+    { type: 1, size: 0.24 },
+    scene,
+  );
+  warmShard.material = warmMaterial;
+  warmShard.scaling.y = 1.25;
+  warmShard.position.set(0.18, 0.84, 0.04);
+  warmShard.rotation.z = -0.2;
+  warmShard.parent = root;
+
+  const motes = Array.from({ length: 4 }, (_, index) => {
     const mote = MeshBuilder.CreateBox(`${id}-mote-${index}`, { size: 0.08 }, scene);
-    mote.material = material;
+    mote.material = index === 1 ? warmMaterial : material;
     mote.parent = root;
     return mote;
   });
 
   const light = new PointLight(`${id}-light`, new Vector3(0, 0.9, 0), scene);
-  light.diffuse = Color3.FromHexString("#9df7e5");
-  light.intensity = 2.8;
-  light.range = 4;
+  light.diffuse = Color3.FromHexString(worldVisualPalette.mintLight);
+  light.intensity = 1.45;
+  light.range = 3.2;
   light.parent = root;
 
   let collected = false;
@@ -57,8 +77,10 @@ export function createLightSpark(
   const disposeSpark = (): void => {
     light.dispose();
     core.dispose();
+    warmShard.dispose();
     motes.forEach((mote) => mote.dispose());
     material.dispose();
+    warmMaterial.dispose();
     root.dispose();
   };
 
@@ -75,8 +97,10 @@ export function createLightSpark(
 
   const createBurst = (): void => {
     burstMaterial = new StandardMaterial(`${id}-burst-material`, scene);
-    burstMaterial.diffuseColor = Color3.FromHexString("#d8fff5");
-    burstMaterial.emissiveColor = Color3.FromHexString("#8aead8");
+    burstMaterial.diffuseColor = Color3.FromHexString(worldVisualPalette.mintLight);
+    burstMaterial.emissiveColor = Color3.FromHexString(
+      worldVisualPalette.mintLight,
+    ).scale(0.7);
     const origin = root.position.add(new Vector3(0, 0.9, 0));
     const velocities: Vector3[] = [];
     burstMeshes = Array.from({ length: 8 }, (_, index) => {
@@ -119,7 +143,9 @@ export function createLightSpark(
       }
       core.position.y = 0.9 + Math.sin(elapsedSeconds * 2.1) * 0.1;
       core.rotation.y = elapsedSeconds * 0.8;
-      light.intensity = 2.6 + Math.sin(elapsedSeconds * 2.4) * 0.35;
+      warmShard.position.y = 0.84 - Math.sin(elapsedSeconds * 2.1) * 0.065;
+      warmShard.rotation.y = -elapsedSeconds * 0.65;
+      light.intensity = 1.38 + Math.sin(elapsedSeconds * 2.4) * 0.12;
       motes.forEach((mote, index) => {
         const phase = elapsedSeconds * 0.7 + (index / motes.length) * Math.PI * 2;
         mote.position.set(
