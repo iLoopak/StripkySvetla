@@ -1,7 +1,7 @@
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import type { Engine } from "@babylonjs/core/Engines/engine";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
-import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import { Scene } from "@babylonjs/core/scene";
@@ -16,9 +16,14 @@ import { createCharacterVisual } from "../characters/createCharacterVisual";
 import type { CharacterVisual } from "../characters/characterVisualTypes";
 import type { HorizontalFacing } from "../core/gameTypes";
 import { createLightSpark, type LightSpark } from "../entities/createLightSpark";
+import {
+  applySkyEnvironmentSceneSettings,
+  createSkyEnvironment,
+  type SkyEnvironment,
+} from "../environment/createSkyEnvironment";
+import { jasnovSkyEnvironment } from "../environment/skyEnvironmentConfig";
 import { createWorldMap, type RenderedWorldMap } from "../world/createWorldMap";
 import { findTerrainCell } from "../world/mapCollision";
-import { worldVisualPalette } from "../visual/visualPalette";
 
 export interface RenderedEntity {
   definition: NpcEntityDefinition | CollectibleEntityDefinition;
@@ -91,14 +96,14 @@ export interface Wave1Scene {
   camera: ArcRotateCamera;
   player: CharacterVisual;
   world: RenderedWorldMap;
+  environment: SkyEnvironment;
   entities: ReadonlyMap<string, RenderedEntity>;
   dispose: () => void;
 }
 
 export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wave1Scene {
   const scene = new Scene(engine);
-  scene.clearColor = Color4.FromHexString(`${worldVisualPalette.sky}ff`);
-  scene.ambientColor = Color3.FromHexString(worldVisualPalette.ambient);
+  applySkyEnvironmentSceneSettings(scene, jasnovSkyEnvironment);
 
   const camera = new ArcRotateCamera(
     "IsometricCamera",
@@ -119,10 +124,13 @@ export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wav
   camera.attachControl(canvas, true);
 
   const skyLight = new HemisphericLight("SkyLight", new Vector3(-0.4, 1, -0.25), scene);
-  skyLight.diffuse = Color3.FromHexString(worldVisualPalette.skyLight);
-  skyLight.groundColor = Color3.FromHexString(worldVisualPalette.groundLight);
-  skyLight.intensity = 1.05;
+  skyLight.diffuse = Color3.FromHexString(jasnovSkyEnvironment.scene.skyLightColor);
+  skyLight.groundColor = Color3.FromHexString(
+    jasnovSkyEnvironment.scene.groundLightColor,
+  );
+  skyLight.intensity = jasnovSkyEnvironment.scene.skyLightIntensity;
 
+  const environment = createSkyEnvironment(scene, camera, jasnovSkyEnvironment);
   const world = createWorldMap(scene, jasnovOutskirts);
   const player = createCharacterVisual(scene, playerCharacter, "player");
   const spawnHeight =
@@ -142,20 +150,17 @@ export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wav
     }
   });
 
-  scene.fogMode = Scene.FOGMODE_LINEAR;
-  scene.fogColor = Color3.FromHexString(worldVisualPalette.fog);
-  scene.fogStart = 22;
-  scene.fogEnd = 38;
-
   return {
     scene,
     camera,
     player,
     world,
+    environment,
     entities,
     dispose: () => {
       world.dispose();
       entities.forEach((entity) => entity.dispose?.());
+      environment.dispose();
     },
   };
 }

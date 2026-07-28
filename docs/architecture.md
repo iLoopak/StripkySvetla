@@ -49,6 +49,27 @@ The visual pass keeps presentation data separate from gameplay:
 The development HUD may read telemetry, while production rendering omits the debug
 panel. Telemetry remains in Zustand for diagnostics and future tooling.
 
+### Scene-level sky environment
+
+`src/game/environment` owns the reusable sky renderer and the typed
+`jasnovSkyEnvironment` configuration. The renderer creates one scene-level root with an
+inverted sky dome, two procedural horizon ribbons, and one cloud-sea mesh. The dome uses a
+small unlit shader generated from ordered gradient stops; horizon and cloud-sea materials
+are shared per layer and use no external textures.
+
+Environment ownership is deliberately separate from `WorldRenderResources`. A rendered
+map owns terrain, decoration instances, its atlas, and map observers; disposing that map
+does not dispose the sky. `GameRuntime` advances the environment's slow animation from the
+Babylon render loop, while scene shutdown explicitly disposes environment meshes,
+materials, and cached scene registration before the scene and engine are released.
+
+The factory keeps one environment registration per Babylon scene and returns the existing
+resource for a repeated request with the same environment ID. This protects Strict Mode
+and hot reload from duplicate domes or cloud seas. A future map transition can dispose and
+replace map content while retaining the same Jasnov environment. Map-specific atmosphere
+will be selected through another validated configuration rather than a second renderer;
+weather, interpolation, and a day/night cycle are outside this pass.
+
 ### World texture atlas
 
 `src/game/world/worldAtlas.ts` owns the typed atlas tile IDs, pixel layout, block-face
@@ -71,9 +92,9 @@ sparse grass variation selects the second grass top. Water, shrine meshes, dark 
 and emissive light objects remain procedural.
 
 Map disposal unregisters shrine observers, disposes the world root and instances, then
-releases cached source references, shared materials, and the atlas texture. The cache is
-not global, so React Strict Mode and hot reload cannot retain resources from a disposed
-runtime.
+releases cached source references, shared materials, and the atlas texture. The map cache
+is not global, and it does not own the scene-level sky environment. React Strict Mode and
+hot reload therefore cannot retain map resources from a disposed runtime.
 
 ## Entity and interaction flow
 
