@@ -10,9 +10,9 @@ trail pointing toward the Moss Forest.
 ## Stack
 
 Vite, React, strict TypeScript, Babylon.js, Zustand, Vitest, ESLint, and Prettier.
-The voxel environment remains procedural. The two humanoid character textures are
-project-owned, reviewed pixel-art PNGs; the project uses no third-party art, fonts, icons,
-models, or textures.
+The voxel geometry remains procedural. The environment uses a project-owned, programmatically
+drawn pixel atlas, and the two humanoid character textures are reviewed project-owned
+pixel-art PNGs. The project uses no third-party art, fonts, icons, models, or textures.
 
 ## Run locally
 
@@ -30,6 +30,12 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
+```
+
+Regenerate the checked-in world atlas after intentionally editing its source patterns:
+
+```bash
+npm run assets:world
 ```
 
 ## Controls
@@ -94,6 +100,20 @@ The pass adds:
 - responsive fantasy-adventure UI, reduced-motion support, and accessible live feedback;
 - development-only telemetry that stays available in the store but does not ship as
   production HUD chrome.
+
+## World pixel textures
+
+The voxel environment uses one `128 × 128 px` atlas of crisp `16 × 16 px` tiles. Grass
+has separate top, side, and dirt-bottom faces; paths use sandy tops and dirt sides; dirt,
+stone, wood, and leaves use their own restrained patterns. Wood has separate side and
+cut-end tiles, while stone, leaves, and the sparse lighter grass cells use subtle stable
+variants.
+
+The atlas carries the final world colors from `worldVisualPalette`. One neutral atlas
+material is shared by all textured voxel sources, nearest-neighbor sampling keeps the
+pixels sharp, and extruded gutters plus half-texel UV insets prevent tile bleeding.
+Repeated blocks remain Babylon instances. Water, shrine geometry, dark stone, and
+emissive light objects keep their focused procedural materials.
 
 ## Wave 1 gameplay foundation
 
