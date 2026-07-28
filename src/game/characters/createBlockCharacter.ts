@@ -6,7 +6,7 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { Scene } from "@babylonjs/core/scene";
 import type { CharacterAccessory, CharacterDefinition } from "../../content/types";
-import type { CharacterAnimationState } from "../core/gameTypes";
+import type { CharacterVisual } from "./characterVisualTypes";
 
 function material(
   name: string,
@@ -208,16 +208,11 @@ function addAccessory(
   brooch.rotation.z = Math.PI * 0.25;
 }
 
-export interface BlockCharacter {
-  root: TransformNode;
-  animate: (state: CharacterAnimationState) => void;
-}
-
 export function createBlockCharacter(
   scene: Scene,
   definition: CharacterDefinition,
   instanceName = definition.id,
-): BlockCharacter {
+): CharacterVisual {
   const root = new TransformNode(`${instanceName}-CharacterRoot`, scene);
   const bodyMaterial = material(
     `${instanceName}-primary`,

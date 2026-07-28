@@ -12,10 +12,9 @@ import type {
   NpcEntityDefinition,
   WorldEntityDefinition,
 } from "../../content/types";
-import {
-  createBlockCharacter,
-  type BlockCharacter,
-} from "../characters/createBlockCharacter";
+import { createCharacterVisual } from "../characters/createCharacterVisual";
+import type { CharacterVisual } from "../characters/characterVisualTypes";
+import type { HorizontalFacing } from "../core/gameTypes";
 import { createLightSpark, type LightSpark } from "../entities/createLightSpark";
 import { createWorldMap, type RenderedWorldMap } from "../world/createWorldMap";
 import { findTerrainCell } from "../world/mapCollision";
@@ -25,6 +24,7 @@ export interface RenderedEntity {
   definition: NpcEntityDefinition | CollectibleEntityDefinition;
   root: TransformNode;
   animate: (elapsedSeconds: number) => void;
+  setFacing?: (facing: HorizontalFacing) => void;
   collect?: (playEffect?: boolean) => boolean;
   dispose?: () => void;
 }
@@ -35,15 +35,20 @@ function renderNpc(scene: Scene, definition: NpcEntityDefinition): RenderedEntit
     throw new Error(`Unknown character definition: ${definition.characterId}`);
   }
 
-  const character = createBlockCharacter(scene, characterDefinition, definition.id);
+  const character = createCharacterVisual(scene, characterDefinition, definition.id);
   const y = findTerrainCell(jasnovOutskirts, definition.position)?.height ?? 0;
+  let facing: HorizontalFacing = "right";
   character.root.position.set(definition.position.x, y, definition.position.z);
   character.root.rotation.y = definition.facing ?? 0;
 
   return {
     definition,
     root: character.root,
-    animate: (elapsedSeconds) => character.animate({ elapsedSeconds, isMoving: false }),
+    animate: (elapsedSeconds) =>
+      character.animate({ elapsedSeconds, isMoving: false, facing }),
+    setFacing: (nextFacing) => {
+      facing = nextFacing;
+    },
   };
 }
 
@@ -84,7 +89,7 @@ function renderEntity(
 export interface Wave1Scene {
   scene: Scene;
   camera: ArcRotateCamera;
-  player: BlockCharacter;
+  player: CharacterVisual;
   world: RenderedWorldMap;
   entities: ReadonlyMap<string, RenderedEntity>;
   dispose: () => void;
@@ -119,7 +124,7 @@ export function createWave1Scene(engine: Engine, canvas: HTMLCanvasElement): Wav
   skyLight.intensity = 1.05;
 
   const world = createWorldMap(scene, jasnovOutskirts);
-  const player = createBlockCharacter(scene, playerCharacter, "player");
+  const player = createCharacterVisual(scene, playerCharacter, "player");
   const spawnHeight =
     findTerrainCell(jasnovOutskirts, jasnovOutskirts.playerSpawn)?.height ?? 0;
   player.root.position.set(

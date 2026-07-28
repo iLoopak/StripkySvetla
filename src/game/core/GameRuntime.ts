@@ -12,9 +12,15 @@ import {
   type InteractionTarget,
 } from "../interaction/InteractionSystem";
 import { InputManager, movementForInputMode } from "../input/InputManager";
+import { resolveHorizontalFacing } from "../characters/characterFacing";
 import { createWave1Scene, type RenderedEntity } from "../scenes/createWave1Scene";
 import { dialogueForNpc } from "../story/storyMachine";
 import { resolveMapMovement, type CircularBlocker } from "../world/mapCollision";
+import {
+  createCameraGroundBasis,
+  resolveCameraRelativeMovement,
+} from "./cameraRelativeMovement";
+import type { HorizontalFacing } from "./gameTypes";
 
 const PLAYER_SPEED = 3.5;
 const TELEMETRY_INTERVAL_MS = 250;
@@ -28,6 +34,7 @@ export class GameRuntime {
   private elapsedSeconds = 0;
   private telemetryElapsedMs = TELEMETRY_INTERVAL_MS;
   private cameraControlsAttached = true;
+  private playerFacing: HorizontalFacing = "right";
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -93,8 +100,14 @@ export class GameRuntime {
 
     const direction = this.input.getMovementDirection();
     const store = useGameStore.getState();
-    const movement = movementForInputMode(direction, store.inputMode);
-    const isMoving = movement.x !== 0 || movement.z !== 0;
+    const inputIntent = movementForInputMode(direction, store.inputMode);
+    const cameraDirection = this.sceneBundle.camera.getDirection(Vector3.Forward());
+    const cameraBasis = createCameraGroundBasis({
+      x: cameraDirection.x,
+      z: cameraDirection.z,
+    });
+    const worldMovement = resolveCameraRelativeMovement(inputIntent, cameraBasis);
+    const isMoving = worldMovement.x !== 0 || worldMovement.z !== 0;
     const characterRoot = this.sceneBundle.player.root;
 
     this.syncCameraControls(store.inputMode);
@@ -106,18 +119,24 @@ export class GameRuntime {
         z: characterRoot.position.z,
       };
       const candidate = {
-        x: current.x + movement.x * PLAYER_SPEED * deltaSeconds,
+        x: current.x + worldMovement.x * PLAYER_SPEED * deltaSeconds,
         y: current.y,
-        z: current.z + movement.z * PLAYER_SPEED * deltaSeconds,
+        z: current.z + worldMovement.z * PLAYER_SPEED * deltaSeconds,
       };
       const next = resolveMapMovement(jasnovOutskirts, current, candidate, this.blockers);
       characterRoot.position.set(next.x, next.y, next.z);
-      characterRoot.rotation.y = Math.atan2(movement.x, movement.z);
+      characterRoot.rotation.y = Math.atan2(worldMovement.x, worldMovement.z);
+      this.playerFacing = resolveHorizontalFacing(
+        worldMovement,
+        cameraBasis.right,
+        this.playerFacing,
+      );
     }
 
     this.sceneBundle.player.animate({
       elapsedSeconds: this.elapsedSeconds,
       isMoving,
+      facing: this.playerFacing,
     });
     this.sceneBundle.entities.forEach((entity) => entity.animate(this.elapsedSeconds));
 
@@ -222,6 +241,14 @@ export class GameRuntime {
     const directionX = playerPosition.x - visual.root.position.x;
     const directionZ = playerPosition.z - visual.root.position.z;
     visual.root.rotation.y = Math.atan2(directionX, directionZ);
+    const screenRight = this.sceneBundle.camera.getDirection(Vector3.Right());
+    visual.setFacing?.(
+      resolveHorizontalFacing(
+        { x: directionX, z: directionZ },
+        { x: screenRight.x, z: screenRight.z },
+        "right",
+      ),
+    );
     state.openDialogue(dialogueId);
   }
 

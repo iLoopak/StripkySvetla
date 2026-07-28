@@ -19,6 +19,12 @@
   Babylon runtime code.
 - Route new proximity interactions through the shared interaction system.
 - Give every important character a recognizable silhouette, not only a different palette.
+- Use 2D side-view pixel sprites for humanoid characters unless an explicit project
+  decision chooses a different visual direction.
+- New humanoid sprites must have a transparent background, face right in side view, use a
+  limited palette, and retain a readable silhouette at gameplay scale.
+- Add only project-owned or explicitly approved visual assets after checking their style,
+  alpha edges, scale, and in-game readability; never accept random external assets as-is.
 - Treat light, lanterns, and split shards as the primary recurring visual motifs.
 - Build new UI from the centralized design tokens instead of repeating visual constants.
 - Keep glow restrained and avoid ornate fantasy frames that compete with gameplay.

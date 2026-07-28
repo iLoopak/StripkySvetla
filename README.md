@@ -1,7 +1,7 @@
 # Střípky světla
 
 A small browser-based voxel JRPG about returning light to a fading world. The project is at
-**Wave 1.5 — visual identity pass**.
+the **pre-Wave 2 sprite-character spike**, following the Wave 1.5 visual identity pass.
 
 The playable Wave 1 loop remains unchanged: the player meets festival steward Mila outside
 Jasnov, accepts a short task, finds a light spark near an old shrine, and returns with a
@@ -10,8 +10,9 @@ trail pointing toward the Moss Forest.
 ## Stack
 
 Vite, React, strict TypeScript, Babylon.js, Zustand, Vitest, ESLint, and Prettier.
-All visuals are procedural; the project uses no external art, fonts, icons, models, or
-textures.
+The voxel environment remains procedural. The two humanoid character textures are
+project-owned, reviewed pixel-art PNGs; the project uses no third-party art, fonts, icons,
+models, or textures.
 
 ## Run locally
 
@@ -52,6 +53,28 @@ instead of special-casing Mila or the light spark.
 See [docs/architecture.md](docs/architecture.md) for runtime boundaries and
 [docs/art-direction.md](docs/art-direction.md) for visual rules.
 
+## Hybrid character spike
+
+The game now combines a **3D voxel world with 2D pixel-art characters placed in 3D
+space**. The player and Mila use small transparent side-view sprites on Y-axis
+billboards, while collision and interaction remain attached to their existing 3D roots.
+
+The sprite renderer provides:
+
+- nearest-neighbor texture sampling without mipmaps;
+- screen-projected left/right facing with last-facing fallback for vertical movement;
+- restrained idle breathing and walk bounce without a sprite sheet;
+- a procedural oval ground shadow that responds subtly to the bounce;
+- the original blocky renderer as a development-only comparison path.
+
+Sprite rendering is the default in development and production. To compare the previous
+blocky characters locally, add this line to an uncommitted `.env.local` file and restart
+the development server:
+
+```dotenv
+VITE_CHARACTER_RENDERER=blocky
+```
+
 ## Wave 1.5 visual identity
 
 The visual direction is **cozy luminous voxel JRPG**: gentle fairy-tale warmth, restrained
@@ -85,6 +108,6 @@ The pass adds:
 
 ## Deliberate non-goals
 
-Wave 1.5 adds no quests, branching, combat, enemies, inventory, saving, audio, portraits,
-cutscenes, new maps, map transitions, gamepad support, touch controls, external assets,
-webfonts, icon packs, shaders, heavy post-processing, or new gameplay systems.
+The pre-Wave 2 spike adds no quests, branching, combat, enemies, inventory, saving, audio,
+portraits, cutscenes, new maps, map transitions, gamepad support, touch controls, webfonts,
+icon packs, shaders, heavy post-processing, or new gameplay systems.
