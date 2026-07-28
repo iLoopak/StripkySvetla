@@ -1,7 +1,9 @@
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import type { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { Observer } from "@babylonjs/core/Misc/observable";
@@ -13,6 +15,14 @@ import type {
 } from "../../content/types";
 import { worldVisualPalette, type WorldVisualColor } from "../visual/visualPalette";
 import { findTerrainCell } from "./mapCollision";
+import {
+  BLOCK_FACE_TEXTURES,
+  createBoxFaceUV,
+  isTexturedBlockKind,
+  resolveBlockTextureVariant,
+  WORLD_ATLAS_PATH,
+  type BlockTextureVariantId,
+} from "./worldAtlas";
 
 type BlockKind =
   | "grass"
@@ -72,31 +82,155 @@ function createMaterial(
   return material;
 }
 
-function createBlockMaterial(kind: BlockKind, scene: Scene): StandardMaterial {
-  const material = createMaterial(
-    `${kind}-material`,
-    worldVisualPalette[BLOCK_COLORS[kind]],
-    scene,
-    EMISSIVE_STRENGTH[kind],
-  );
-  if (kind === "water") {
-    material.alpha = 0.76;
+interface WorldRenderResourceStats {
+  atlasTextures: number;
+  sharedMaterials: number;
+  sourceMeshes: number;
+}
+
+class WorldRenderResources {
+  private atlasTexture: Texture | null = null;
+  private atlasMaterial: StandardMaterial | null = null;
+  private readonly proceduralMaterials = new Map<BlockKind, StandardMaterial>();
+  private readonly sourceMeshes = new Map<string, Mesh>();
+
+  constructor(private readonly scene: Scene) {}
+
+  getSourceMesh(
+    key: string,
+    kind: BlockKind,
+    textureVariant: BlockTextureVariantId | null,
+  ): Mesh {
+    const cached = this.sourceMeshes.get(key);
+    if (cached) {
+      return cached;
+    }
+
+    const source = MeshBuilder.CreateBox(
+      `${key}-blocks`,
+      textureVariant
+        ? {
+            size: 1,
+            faceUV: createBoxFaceUV(BLOCK_FACE_TEXTURES[textureVariant]),
+          }
+        : { size: 1 },
+      this.scene,
+    );
+    source.material = textureVariant
+      ? this.getAtlasMaterial()
+      : this.getProceduralMaterial(kind);
+    source.receiveShadows = kind !== "water";
+    this.sourceMeshes.set(key, source);
+    return source;
   }
-  return material;
+
+  getStats(): WorldRenderResourceStats {
+    return {
+      atlasTextures: this.atlasTexture ? 1 : 0,
+      sharedMaterials: this.proceduralMaterials.size + (this.atlasMaterial ? 1 : 0),
+      sourceMeshes: this.sourceMeshes.size,
+    };
+  }
+
+  dispose(): void {
+    this.sourceMeshes.forEach((source) => {
+      if (!source.isDisposed()) {
+        source.dispose(false, false);
+      }
+    });
+    this.sourceMeshes.clear();
+    this.proceduralMaterials.forEach((material) => material.dispose());
+    this.proceduralMaterials.clear();
+    this.atlasMaterial?.dispose(false, false);
+    this.atlasMaterial = null;
+    this.atlasTexture?.dispose();
+    this.atlasTexture = null;
+  }
+
+  private getAtlasMaterial(): StandardMaterial {
+    if (this.atlasMaterial) {
+      return this.atlasMaterial;
+    }
+
+    const texture = new Texture(
+      WORLD_ATLAS_PATH,
+      this.scene,
+      true,
+      true,
+      Texture.NEAREST_SAMPLINGMODE,
+    );
+    texture.name = "world-atlas-texture";
+    texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+    texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+    texture.anisotropicFilteringLevel = 1;
+
+    const material = new StandardMaterial("world-atlas-material", this.scene);
+    material.diffuseColor = Color3.White();
+    material.diffuseTexture = texture;
+    material.specularColor = Color3.Black();
+
+    this.atlasTexture = texture;
+    this.atlasMaterial = material;
+    return material;
+  }
+
+  private getProceduralMaterial(kind: BlockKind): StandardMaterial {
+    const cached = this.proceduralMaterials.get(kind);
+    if (cached) {
+      return cached;
+    }
+
+    const material = createMaterial(
+      `${kind}-material`,
+      worldVisualPalette[BLOCK_COLORS[kind]],
+      this.scene,
+      EMISSIVE_STRENGTH[kind],
+    );
+    if (kind === "water") {
+      material.alpha = 0.76;
+    }
+    this.proceduralMaterials.set(kind, material);
+    return material;
+  }
+}
+
+interface BlockRenderGroup {
+  kind: BlockKind;
+  textureVariant: BlockTextureVariantId | null;
+  blocks: Block[];
+}
+
+function resolveBlockRenderKey(block: Block): {
+  key: string;
+  textureVariant: BlockTextureVariantId | null;
+} {
+  if (!isTexturedBlockKind(block.kind)) {
+    return { key: `procedural-${block.kind}`, textureVariant: null };
+  }
+
+  const textureVariant = resolveBlockTextureVariant(
+    block.kind,
+    block.position.x,
+    block.position.z,
+  );
+  return { key: `textured-${textureVariant}`, textureVariant };
 }
 
 function createInstanceGroup(
-  kind: BlockKind,
-  blocks: readonly Block[],
+  key: string,
+  renderGroup: BlockRenderGroup,
+  resources: WorldRenderResources,
   scene: Scene,
 ): TransformNode {
-  const group = new TransformNode(`${kind}-group`, scene);
-  const source = MeshBuilder.CreateBox(`${kind}-blocks`, { size: 1 }, scene);
-  source.material = createBlockMaterial(kind, scene);
-  source.receiveShadows = kind !== "water";
+  const group = new TransformNode(`${key}-group`, scene);
+  const source = resources.getSourceMesh(
+    key,
+    renderGroup.kind,
+    renderGroup.textureVariant,
+  );
 
-  blocks.forEach((block, index) => {
-    const mesh = index === 0 ? source : source.createInstance(`${kind}-${index}`);
+  renderGroup.blocks.forEach((block, index) => {
+    const mesh = index === 0 ? source : source.createInstance(`${key}-${index}`);
     mesh.position.copyFrom(block.position);
     mesh.scaling.copyFrom(block.scaling ?? Vector3.One());
     mesh.rotation.copyFrom(block.rotation ?? Vector3.Zero());
@@ -358,17 +492,24 @@ function createShrine(
 export interface RenderedWorldMap {
   root: TransformNode;
   water: TransformNode | null;
+  resourceStats: WorldRenderResourceStats;
   dispose: () => void;
 }
 
 export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedWorldMap {
   const root = new TransformNode(`${map.id}-world`, scene);
-  const blocksByKind = new Map<BlockKind, Block[]>();
+  const renderGroups = new Map<string, BlockRenderGroup>();
+  const resources = new WorldRenderResources(scene);
   const shrineObservers: Observer<Scene>[] = [];
   const push = (block: Block): void => {
-    const blocks = blocksByKind.get(block.kind) ?? [];
-    blocks.push(block);
-    blocksByKind.set(block.kind, blocks);
+    const descriptor = resolveBlockRenderKey(block);
+    const renderGroup = renderGroups.get(descriptor.key) ?? {
+      kind: block.kind,
+      textureVariant: descriptor.textureVariant,
+      blocks: [],
+    };
+    renderGroup.blocks.push(block);
+    renderGroups.set(descriptor.key, renderGroup);
   };
 
   map.terrain.forEach((cell) => {
@@ -425,10 +566,10 @@ export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedW
   });
 
   let water: TransformNode | null = null;
-  blocksByKind.forEach((blocks, kind) => {
-    const group = createInstanceGroup(kind, blocks, scene);
+  renderGroups.forEach((renderGroup, key) => {
+    const group = createInstanceGroup(key, renderGroup, resources, scene);
     group.parent = root;
-    if (kind === "water") {
+    if (renderGroup.kind === "water") {
       water = group;
     }
   });
@@ -436,10 +577,13 @@ export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedW
   return {
     root,
     water,
+    resourceStats: resources.getStats(),
     dispose: () => {
       shrineObservers.forEach((observer) =>
         scene.onBeforeRenderObservable.remove(observer),
       );
+      root.dispose(false, false);
+      resources.dispose();
     },
   };
 }

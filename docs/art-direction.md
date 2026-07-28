@@ -122,6 +122,29 @@ never become palette swaps.
 - Alternate terrain color sparingly to soften the technical grid.
 - Use height and contrast to guide attention before adding glow.
 
+## World pixel textures
+
+The voxel world uses a project-owned `128 × 128 px` atlas with `16 × 16 px` authored
+tiles. Each tile uses a limited palette, hard pixel edges, no antialiasing, and a
+one-pixel extruded gutter. Patterns must remain seamless, sparse, and readable from the
+default gameplay camera; they should add surface character without turning the terrain
+into visual noise.
+
+New tiles must:
+
+- reuse or deliberately extend `worldVisualPalette`;
+- stay low-contrast and avoid photographic detail, realistic material noise, or
+  Minecraft-like treatment;
+- tile cleanly on every required edge and preserve their extruded border pixels;
+- use broad clusters rather than scattered single-pixel noise;
+- remain visually quieter than humanoid sprites, paths, interactions, and landmarks;
+- omit baked glow so lanterns, shards, flowers, and shrine lights retain their identity.
+
+Material variants are allowed only when they remain recognizably the same material.
+Variant selection must be deterministic from stable world data, never per-frame random.
+Every new or edited tile must be checked at default zoom, near and far zoom, and multiple
+camera rotations before acceptance.
+
 ## Do / do not
 
 Do:

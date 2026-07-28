@@ -49,6 +49,32 @@ The visual pass keeps presentation data separate from gameplay:
 The development HUD may read telemetry, while production rendering omits the debug
 panel. Telemetry remains in Zustand for diagnostics and future tooling.
 
+### World texture atlas
+
+`src/game/world/worldAtlas.ts` owns the typed atlas tile IDs, pixel layout, block-face
+definitions, deterministic variant selection, and the single UV helper. The checked-in
+`public/assets/world/world-atlas.png` is generated from the deliberately small pixel
+patterns in `scripts/generate-world-atlas.mjs`; running `npm run assets:world` reproduces
+the asset.
+
+Box geometry uses Babylon's face order to map one side tile to the four vertical faces
+and distinct top and bottom tiles where needed. Atlas rows are authored from the top of
+the PNG, so the UV helper converts them to Babylon coordinates and applies a half-texel
+inset. Every 16-pixel tile also has a one-pixel extruded gutter. This keeps UV arithmetic
+centralized and prevents adjacent tiles from bleeding into one another.
+
+`WorldRenderResources` is scoped to one rendered map. It owns one nearest-neighbor atlas
+texture, one neutral atlas material, the remaining procedural materials, and one source
+mesh per face-UV configuration. Blocks that share a source mesh remain Babylon
+instances. Stone and leaf source selection uses a stable position hash; the existing
+sparse grass variation selects the second grass top. Water, shrine meshes, dark stone,
+and emissive light objects remain procedural.
+
+Map disposal unregisters shrine observers, disposes the world root and instances, then
+releases cached source references, shared materials, and the atlas texture. The cache is
+not global, so React Strict Mode and hot reload cannot retain resources from a disposed
+runtime.
+
 ## Entity and interaction flow
 
 NPC, collectible, and decoration definitions use stable IDs and a discriminated

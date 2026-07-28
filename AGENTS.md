@@ -29,3 +29,8 @@
 - Build new UI from the centralized design tokens instead of repeating visual constants.
 - Keep glow restrained and avoid ornate fantasy frames that compete with gameplay.
 - Preserve gameplay clarity and performance when adding visual polish.
+- Use the approved world atlas for voxel textures; do not create a material or texture
+  per block.
+- Keep new atlas tiles small, seamless, palette-limited, and pixel-sharp.
+- Select texture variants deterministically from stable world data.
+- Review every new or changed world texture in the gameplay camera.
