@@ -1,5 +1,5 @@
 import type { GridPosition, InteractionDefinition } from "../../content/types";
-import type { Wave1StoryStage } from "../story/storyTypes";
+import type { ChapterOneStage } from "../story/storyTypes";
 
 export interface InteractionTarget {
   definition: InteractionDefinition;
@@ -14,7 +14,7 @@ export function distanceBetween(a: GridPosition, b: GridPosition): number {
 export function findNearestInteraction(
   playerPosition: GridPosition,
   targets: readonly InteractionTarget[],
-  stage: Wave1StoryStage,
+  stage: ChapterOneStage,
 ): InteractionTarget | null {
   let nearest: InteractionTarget | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;

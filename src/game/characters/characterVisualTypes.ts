@@ -4,4 +4,5 @@ import type { CharacterAnimationState } from "../core/gameTypes";
 export interface CharacterVisual {
   root: TransformNode;
   animate: (state: CharacterAnimationState) => void;
+  dispose?: () => void;
 }

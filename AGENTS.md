@@ -38,3 +38,11 @@
 - Keep the sky environment scene-owned and independent from map-content disposal.
 - Keep every distant horizon seamless through a full camera rotation.
 - Keep sky, horizon, fog, and clouds secondary to gameplay focal points.
+- Store story choices as explicit, versioned values; do not infer them only from trust.
+- Preserve long-term choice outcomes when branch-and-fold paths converge.
+- Keep dialogue nodes, choices, conditions, and story actions data-driven.
+- Route new humanoid characters through the approved shared sprite renderer.
+- Validate new sprite assets for style, alpha, baseline, scale, and gameplay readability.
+- Build new maps with the existing world atlas and face-UV pipeline.
+- Keep the sky environment scene-owned across map transitions.
+- Never create a second engine or duplicate atlas and sky resources during map transitions.

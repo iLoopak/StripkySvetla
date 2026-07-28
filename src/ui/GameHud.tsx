@@ -8,7 +8,7 @@ export function GameHud() {
   const status = useGameStore((state) => state.status);
   const fps = useGameStore((state) => state.fps);
   const playerPosition = useGameStore((state) => state.playerPosition);
-  const storyStage = useGameStore((state) => state.storyStage);
+  const storyStage = useGameStore((state) => state.stage);
   const interactionPrompt = useGameStore((state) => state.interactionPrompt);
   const inputMode = useGameStore((state) => state.inputMode);
   const objective = objectiveForStage(storyStage);
@@ -21,7 +21,7 @@ export function GameHud() {
       <header className="title-panel">
         <div className="title-kicker">
           <LightShardMark className="light-shard-mark--title" />
-          <p className="eyebrow">Wave 1.5 · Světelná stopa</p>
+          <p className="eyebrow">Wave 2 · Zmizelé stužky</p>
         </div>
         <h1>Střípky světla</h1>
         <span className="title-light-line" aria-hidden="true">

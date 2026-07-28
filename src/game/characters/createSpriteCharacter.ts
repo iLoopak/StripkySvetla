@@ -120,6 +120,11 @@ export function createSpriteCharacter(
   contactShadow.material = contactShadowMaterial;
   contactShadow.isPickable = false;
 
+  if (definition.kind === "spirit") {
+    outerShadow.setEnabled(false);
+    contactShadow.setEnabled(false);
+  }
+
   let lanternGlow: Mesh | null = null;
   let lanternGlowMaterial: StandardMaterial | null = null;
   let lanternGlowLayer: GlowLayer | null = null;
@@ -161,6 +166,14 @@ export function createSpriteCharacter(
     });
     lanternGlowLayer.intensity = 0.34;
     lanternGlowLayer.addIncludedOnlyMesh(lanternGlow);
+  } else if (definition.kind === "spirit") {
+    lanternGlowLayer = new GlowLayer(`${instanceName}-SpiritGlowLayer`, scene, {
+      blurKernelSize: 10,
+      excludeByDefault: true,
+      mainTextureFixedSize: 128,
+    });
+    lanternGlowLayer.intensity = 0.32;
+    lanternGlowLayer.addIncludedOnlyMesh(plane);
   }
 
   return {
@@ -197,7 +210,21 @@ export function createSpriteCharacter(
         lanternGlow.scaling.setAll(glowPulse);
         lanternGlowMaterial.alpha = 0.78 + glowPulse * 0.05;
         lanternGlowLayer.setEffectIntensity(lanternGlow, glowPulse);
+      } else if (definition.kind === "spirit" && lanternGlowLayer) {
+        lanternGlowLayer.setEffectIntensity(
+          plane,
+          0.9 + Math.sin(elapsedSeconds * 2.1) * 0.08,
+        );
       }
+    },
+    dispose: () => {
+      lanternGlowLayer?.dispose();
+      root.dispose(false, false);
+      spriteMaterial.dispose(false, false);
+      outerShadowMaterial.dispose();
+      contactShadowMaterial.dispose();
+      lanternGlowMaterial?.dispose();
+      texture.dispose();
     },
   };
 }
