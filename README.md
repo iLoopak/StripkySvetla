@@ -1,7 +1,8 @@
 # Střípky světla
 
 A small browser-based voxel JRPG about returning light to a fading world. The project is at
-the **pre-Wave 2 sprite-character spike**, following the Wave 1.5 visual identity pass.
+the **pre-Wave 2 environment pass**, following the sprite-character and voxel texture
+spikes.
 
 The playable Wave 1 loop remains unchanged: the player meets festival steward Mila outside
 Jasnov, accepts a short task, finds a light spark near an old shrine, and returns with a
@@ -115,6 +116,19 @@ pixels sharp, and extruded gutters plus half-texel UV insets prevent tile bleedi
 Repeated blocks remain Babylon instances. Water, shrine geometry, dark stone, and
 emissive light objects keep their focused procedural materials.
 
+## Stylized sky environment
+
+The scene uses a shared, scene-level Jasnov environment instead of a photographic skybox.
+A small unlit sky-dome shader blends the authored petrol zenith, cool blue-green middle,
+muted horizon, and one restrained warm horizon accent without an image asset. Two seamless
+procedural horizon ribbons add distant low-poly silhouettes, while one softly faded mesh
+forms a slow-moving cloud and fog sea below the island.
+
+Sky, fog, ambient light, and hemispheric light colors come from the same environment
+configuration. The environment survives map-content disposal and is intended to be shared
+by both Jasnov maps; a later map-specific atmosphere can select another configuration
+without duplicating the renderer.
+
 ## Wave 1 gameplay foundation
 
 - data-driven Jasnov outskirts map with terrain, decorations, and collision;
@@ -128,6 +142,6 @@ emissive light objects keep their focused procedural materials.
 
 ## Deliberate non-goals
 
-The pre-Wave 2 spike adds no quests, branching, combat, enemies, inventory, saving, audio,
+The pre-Wave 2 pass adds no quests, branching, combat, enemies, inventory, saving, audio,
 portraits, cutscenes, new maps, map transitions, gamepad support, touch controls, webfonts,
-icon packs, shaders, heavy post-processing, or new gameplay systems.
+icon packs, heavy post-processing, weather, a day/night cycle, or new gameplay systems.

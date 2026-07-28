@@ -1,4 +1,11 @@
 import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
+import "@babylonjs/core/Shaders/glowBlurPostProcess.fragment.js";
+import "@babylonjs/core/Shaders/glowMapGeneration.fragment.js";
+import "@babylonjs/core/Shaders/glowMapGeneration.vertex.js";
+import "@babylonjs/core/Shaders/glowMapMerge.fragment.js";
+import "@babylonjs/core/Shaders/glowMapMerge.vertex.js";
+import "@babylonjs/core/Shaders/kernelBlur.fragment.js";
+import "@babylonjs/core/Shaders/kernelBlur.vertex.js";
 import { Material } from "@babylonjs/core/Materials/material";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";

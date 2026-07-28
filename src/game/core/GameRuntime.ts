@@ -174,6 +174,7 @@ export class GameRuntime {
     if (water) {
       water.position.y = Math.sin(this.elapsedSeconds * 1.2) * 0.025;
     }
+    this.sceneBundle.environment.update(this.elapsedSeconds);
 
     if (this.telemetryElapsedMs >= TELEMETRY_INTERVAL_MS) {
       this.telemetryElapsedMs = 0;

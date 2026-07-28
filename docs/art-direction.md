@@ -122,6 +122,23 @@ never become palette swaps.
 - Alternate terrain color sparingly to soften the technical grid.
 - Use height and contrast to guide attention before adding glow.
 
+## Sky and distant environment
+
+The Jasnov sky begins at a dark petrol zenith, moves through restrained blue-green, and
+settles into a muted light horizon. One soft, localized gold tint may warm part of that
+horizon, but it must never compete with the shrine, lanterns, character accents, or UI.
+
+Use a seamless sky dome or equivalent scene background. Do not use photographic skyboxes,
+HDR panoramas, realistic clouds, star fields, or saturated summer-blue skies. Distant
+hills use one or two desaturated, low-contrast silhouette layers with no visible seam
+during a full camera rotation. Fog color must continue the horizon and lower-mist palette
+instead of becoming an unrelated gray veil.
+
+Clouds stay sparse. The default Jasnov environment uses no separate overhead cloud
+clusters; its single low cloud sea anchors the diorama below terrain level. The layer
+should suggest that the island rises above calm mist, preserve readable lower terrain
+edges, and avoid noisy alpha patterns or volumetric effects.
+
 ## World pixel textures
 
 The voxel world uses a project-owned `128 × 128 px` atlas with `16 × 16 px` authored
@@ -187,3 +204,5 @@ Do not:
 - [ ] Repeated world details are instanced and materials are shared.
 - [ ] Reduced motion, focus visibility, live feedback, and contrast still work.
 - [ ] Gameplay, lifecycle, hot reload, automated checks, and performance remain intact.
+- [ ] Sky, horizon, and cloud sea stay secondary to characters and luminous landmarks.
+- [ ] A full camera rotation reveals no sky or horizon seam.

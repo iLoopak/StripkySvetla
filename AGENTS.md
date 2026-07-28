@@ -34,3 +34,7 @@
 - Keep new atlas tiles small, seamless, palette-limited, and pixel-sharp.
 - Select texture variants deterministically from stable world data.
 - Review every new or changed world texture in the gameplay camera.
+- Do not add arbitrary HDR panoramas or photographic skyboxes.
+- Keep the sky environment scene-owned and independent from map-content disposal.
+- Keep every distant horizon seamless through a full camera rotation.
+- Keep sky, horizon, fog, and clouds secondary to gameplay focal points.
