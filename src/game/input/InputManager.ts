@@ -1,5 +1,6 @@
 import type { MovementDirection } from "../core/gameTypes";
 import { normalizeMovement } from "../../utils/math";
+import type { InputMode } from "../story/storyTypes";
 
 const MOVEMENT_KEYS = new Set([
   "KeyW",
@@ -11,6 +12,7 @@ const MOVEMENT_KEYS = new Set([
   "ArrowLeft",
   "ArrowRight",
 ]);
+const INTERACTION_KEYS = new Set(["KeyE", "Enter"]);
 
 export function directionFromKeys(keys: ReadonlySet<string>): MovementDirection {
   const x =
@@ -23,8 +25,16 @@ export function directionFromKeys(keys: ReadonlySet<string>): MovementDirection 
   return normalizeMovement({ x, z });
 }
 
+export function movementForInputMode(
+  direction: MovementDirection,
+  inputMode: InputMode,
+): MovementDirection {
+  return inputMode === "world" ? direction : { x: 0, z: 0 };
+}
+
 export class InputManager {
   private readonly pressedKeys = new Set<string>();
+  private interactionPressed = false;
   private disposed = false;
 
   constructor(private readonly target: Window = window) {
@@ -37,6 +47,12 @@ export class InputManager {
     return directionFromKeys(this.pressedKeys);
   }
 
+  consumeInteractionPressed(): boolean {
+    const pressed = this.interactionPressed;
+    this.interactionPressed = false;
+    return pressed;
+  }
+
   dispose(): void {
     if (this.disposed) {
       return;
@@ -44,12 +60,21 @@ export class InputManager {
 
     this.disposed = true;
     this.pressedKeys.clear();
+    this.interactionPressed = false;
     this.target.removeEventListener("keydown", this.handleKeyDown);
     this.target.removeEventListener("keyup", this.handleKeyUp);
     this.target.removeEventListener("blur", this.handleBlur);
   }
 
   private readonly handleKeyDown = (event: KeyboardEvent): void => {
+    if (INTERACTION_KEYS.has(event.code)) {
+      event.preventDefault();
+      if (!event.repeat) {
+        this.interactionPressed = true;
+      }
+      return;
+    }
+
     if (!MOVEMENT_KEYS.has(event.code)) {
       return;
     }

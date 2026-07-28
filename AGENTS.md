@@ -14,3 +14,7 @@
 - Every change must pass typecheck, lint, tests, and the production build.
 - Fix warnings at their source. Do not hide them with indiscriminate `eslint-disable`
   comments.
+- Keep story transitions and objective selection out of React components.
+- Keep authored map, entity, interaction, dialogue, and objective content separate from
+  Babylon runtime code.
+- Route new proximity interactions through the shared interaction system.
