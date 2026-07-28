@@ -93,7 +93,8 @@ const entities: readonly WorldEntityDefinition[] = [
       "meet-mila": "mila-introduction",
       "find-spark": "mila-searching",
       "return-to-mila": "mila-return",
-      completed: "mila-completed",
+      "receive-rena-delivery": "mila-rena-delivery",
+      "travel-to-jasnov": "mila-after-delivery",
     },
   },
   {
@@ -101,6 +102,12 @@ const entities: readonly WorldEntityDefinition[] = [
     type: "collectible",
     collectibleId: "light-spark",
     position: { x: -1.8, z: -2.4 },
+  },
+  {
+    id: "jasnov-town-gate",
+    type: "decoration",
+    decorationKind: "town-gate",
+    position: { x: -3.5, z: -7.4 },
   },
 ];
 
@@ -111,7 +118,13 @@ const interactions: readonly InteractionDefinition[] = [
     targetId: "mila",
     prompt: "E · Promluvit",
     interactionRadius: 1.85,
-    availableStages: ["meet-mila", "find-spark", "return-to-mila", "completed"],
+    availableStages: [
+      "meet-mila",
+      "find-spark",
+      "return-to-mila",
+      "receive-rena-delivery",
+      "travel-to-jasnov",
+    ],
   },
   {
     id: "collect-light-spark",
@@ -120,6 +133,15 @@ const interactions: readonly InteractionDefinition[] = [
     prompt: "E · Sebrat světelnou jiskru",
     interactionRadius: 1.45,
     availableStages: ["find-spark"],
+  },
+  {
+    id: "enter-jasnov",
+    type: "transition",
+    targetId: "jasnov-town-gate",
+    transitionId: "to-festival-square",
+    prompt: "E · Vstoupit do Jasnova",
+    interactionRadius: 1.6,
+    availableStages: ["travel-to-jasnov"],
   },
 ];
 
@@ -175,6 +197,15 @@ export const jasnovOutskirts: WorldMapDefinition = {
   width: 17,
   depth: 17,
   playerSpawn: { x: -6, z: 2.5 },
+  entryPoints: [{ id: "wave-1-start", position: { x: -6, z: 2.5 }, facing: "right" }],
+  transitions: [
+    {
+      id: "to-festival-square",
+      targetMapId: "jasnov-festival-square",
+      targetEntryPointId: "from-outskirts",
+      conditions: [{ stage: "travel-to-jasnov" }],
+    },
+  ],
   terrain: createTerrain(),
   entities,
   interactions,

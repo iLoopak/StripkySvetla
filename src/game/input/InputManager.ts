@@ -14,6 +14,16 @@ const MOVEMENT_KEYS = new Set([
 ]);
 const INTERACTION_KEYS = new Set(["KeyE", "Enter"]);
 
+export function choiceNavigationForKey(code: string): -1 | 0 | 1 {
+  if (code === "KeyW" || code === "ArrowUp") {
+    return -1;
+  }
+  if (code === "KeyS" || code === "ArrowDown") {
+    return 1;
+  }
+  return 0;
+}
+
 export function directionFromKeys(keys: ReadonlySet<string>): MovementDirection {
   const x =
     Number(keys.has("KeyD") || keys.has("ArrowRight")) -
@@ -35,6 +45,7 @@ export function movementForInputMode(
 export class InputManager {
   private readonly pressedKeys = new Set<string>();
   private interactionPressed = false;
+  private choiceNavigation: -1 | 0 | 1 = 0;
   private disposed = false;
 
   constructor(private readonly target: Window = window) {
@@ -53,6 +64,12 @@ export class InputManager {
     return pressed;
   }
 
+  consumeChoiceNavigation(): -1 | 0 | 1 {
+    const navigation = this.choiceNavigation;
+    this.choiceNavigation = 0;
+    return navigation;
+  }
+
   dispose(): void {
     if (this.disposed) {
       return;
@@ -61,6 +78,7 @@ export class InputManager {
     this.disposed = true;
     this.pressedKeys.clear();
     this.interactionPressed = false;
+    this.choiceNavigation = 0;
     this.target.removeEventListener("keydown", this.handleKeyDown);
     this.target.removeEventListener("keyup", this.handleKeyUp);
     this.target.removeEventListener("blur", this.handleBlur);
@@ -80,6 +98,9 @@ export class InputManager {
     }
 
     event.preventDefault();
+    if (!event.repeat) {
+      this.choiceNavigation = choiceNavigationForKey(event.code);
+    }
     this.pressedKeys.add(event.code);
   };
 
@@ -94,5 +115,6 @@ export class InputManager {
 
   private readonly handleBlur = (): void => {
     this.pressedKeys.clear();
+    this.choiceNavigation = 0;
   };
 }

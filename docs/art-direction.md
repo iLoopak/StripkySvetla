@@ -192,6 +192,38 @@ Do not:
 - Preserve the mint/gold meaning and the split-shard/lantern vocabulary.
 - Profile draw calls and lights before adding more transparent or emissive geometry.
 
+## Wave 2 characters
+
+Puk is a compact non-humanoid light spirit built from a mint flame, a split crystal shape,
+and a warm cream core. His face is limited to small dark eyes, with one restrained floating
+gold shard. Glow comes from Babylon presentation, never a baked halo.
+
+Rena shares the approved 64 × 96 humanoid baseline but has a firmer silhouette than Mila:
+a moss and dark-petrol practical coat, rust shoulder wrap, tied-back hair, tall boots, and a
+small gate key. She reads as a competent road guardian rather than a soldier.
+
+Špunt is a low, alert side-view fox with short legs, large pointed ears, an ear notch, and a
+large readable tail. Rust, cream, dark petrol, and a tiny mint mark connect him to the Moss
+Forest without making him a mascot. The festival ribbon is a small procedural prop so the
+base sprite identity remains stable across story states.
+
+Non-humanoid sprites still require a transparent background, limited palette, clean alpha,
+clear baseline or levitation anchor, and readability at the gameplay camera. State variants
+must preserve exact proportions, palette, and anchoring. Prefer a separate prop when it
+communicates the state without duplicating the sprite.
+
+## Festival square
+
+The second map reuses grass, dirt, path, stone, wood, and leaves from the approved atlas.
+Its identity comes from composition: a compact paved square, wood storehouse, instanced
+stalls and tables, suspended coral-and-gold ribbons, festival lanterns, supply crates, a
+safe pen, and the split-shard forest gate. Props remain simple, palette-limited, and
+subordinate to sprite silhouettes and interaction landmarks.
+
+The festival square uses the same gradient sky, distant horizons, cloud sea, and compatible
+fog as the outskirts. Warm festival accents differentiate the place without creating a new
+skybox or photographic backdrop.
+
 ## Visual checklist for future waves
 
 - [ ] Important character sprites are distinguishable in silhouette at gameplay distance.

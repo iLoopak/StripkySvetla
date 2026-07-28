@@ -82,13 +82,13 @@ function createMaterial(
   return material;
 }
 
-interface WorldRenderResourceStats {
+export interface WorldRenderResourceStats {
   atlasTextures: number;
   sharedMaterials: number;
   sourceMeshes: number;
 }
 
-class WorldRenderResources {
+export class WorldRenderResources {
   private atlasTexture: Texture | null = null;
   private atlasMaterial: StandardMaterial | null = null;
   private readonly proceduralMaterials = new Map<BlockKind, StandardMaterial>();
@@ -120,6 +120,7 @@ class WorldRenderResources {
       ? this.getAtlasMaterial()
       : this.getProceduralMaterial(kind);
     source.receiveShadows = kind !== "water";
+    source.position.y = -10_000;
     this.sourceMeshes.set(key, source);
     return source;
   }
@@ -230,7 +231,7 @@ function createInstanceGroup(
   );
 
   renderGroup.blocks.forEach((block, index) => {
-    const mesh = index === 0 ? source : source.createInstance(`${key}-${index}`);
+    const mesh = source.createInstance(`${key}-${index}`);
     mesh.position.copyFrom(block.position);
     mesh.scaling.copyFrom(block.scaling ?? Vector3.One());
     mesh.rotation.copyFrom(block.rotation ?? Vector3.Zero());
@@ -238,6 +239,125 @@ function createInstanceGroup(
   });
 
   return group;
+}
+
+function addFestivalDecoration(
+  blocks: Block[],
+  entity: DecorationEntityDefinition,
+  y: number,
+): void {
+  const { x, z } = entity.position;
+  if (entity.decorationKind === "storehouse") {
+    for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+      for (let offsetZ = -1; offsetZ <= 1; offsetZ += 1) {
+        blocks.push({
+          kind: offsetZ === -1 && offsetX === 0 ? "stoneDark" : "wood",
+          position: new Vector3(x + offsetX * 0.72, y + 0.68, z + offsetZ * 0.72),
+          scaling: new Vector3(0.74, 1.36, 0.74),
+        });
+        blocks.push({
+          kind: "stoneDark",
+          position: new Vector3(x + offsetX * 0.76, y + 1.46, z + offsetZ * 0.76),
+          scaling: new Vector3(0.82, 0.2, 0.82),
+        });
+      }
+    }
+    return;
+  }
+
+  if (entity.decorationKind === "festival-stall") {
+    [-0.62, 0.62].forEach((offsetX) =>
+      [-0.38, 0.38].forEach((offsetZ) =>
+        blocks.push({
+          kind: "wood",
+          position: new Vector3(x + offsetX, y + 0.75, z + offsetZ),
+          scaling: new Vector3(0.13, 1.5, 0.13),
+        }),
+      ),
+    );
+    blocks.push(
+      {
+        kind: "wood",
+        position: new Vector3(x, y + 0.78, z),
+        scaling: new Vector3(1.5, 0.16, 0.9),
+      },
+      {
+        kind: "burgundy",
+        position: new Vector3(x, y + 1.52, z),
+        scaling: new Vector3(1.62, 0.14, 1.02),
+      },
+    );
+    return;
+  }
+
+  if (entity.decorationKind === "crate") {
+    blocks.push({
+      kind: "wood",
+      position: new Vector3(x, y + 0.34, z),
+      scaling: new Vector3(0.68, 0.68, 0.68),
+      rotation: new Vector3(0, Math.PI * 0.04, 0),
+    });
+    return;
+  }
+
+  if (entity.decorationKind === "pen") {
+    for (const [offsetX, offsetZ] of [
+      [-0.8, -0.6],
+      [0, -0.6],
+      [0.8, -0.6],
+      [-0.8, 0.6],
+      [0.8, 0.6],
+      [-0.8, 0],
+      [0.8, 0],
+    ]) {
+      blocks.push({
+        kind: "wood",
+        position: new Vector3(x + offsetX, y + 0.45, z + offsetZ),
+        scaling: new Vector3(0.12, 0.9, 0.12),
+      });
+    }
+    return;
+  }
+
+  if (entity.decorationKind === "forest-gate" || entity.decorationKind === "town-gate") {
+    [-0.72, 0.72].forEach((offsetX) =>
+      blocks.push({
+        kind: entity.decorationKind === "forest-gate" ? "stoneDark" : "wood",
+        position: new Vector3(x + offsetX, y + 0.86, z),
+        scaling: new Vector3(0.26, 1.72, 0.3),
+      }),
+    );
+    blocks.push(
+      {
+        kind: "wood",
+        position: new Vector3(x, y + 1.48, z),
+        scaling: new Vector3(1.7, 0.18, 0.24),
+      },
+      {
+        kind: entity.decorationKind === "forest-gate" ? "mintLight" : "goldLight",
+        position: new Vector3(x, y + 1.58, z - 0.17),
+        scaling: new Vector3(0.22, 0.22, 0.08),
+        rotation: new Vector3(0, 0, Math.PI * 0.25),
+      },
+    );
+    return;
+  }
+
+  if (entity.decorationKind === "clue-marker") {
+    blocks.push(
+      {
+        kind: "burgundy",
+        position: new Vector3(x, y + 0.06, z),
+        scaling: new Vector3(0.62, 0.06, 0.14),
+        rotation: new Vector3(0, Math.PI * 0.18, 0),
+      },
+      {
+        kind: "mintLight",
+        position: new Vector3(x + 0.3, y + 0.08, z + 0.2),
+        scaling: new Vector3(0.12, 0.05, 0.12),
+      },
+    );
+  }
 }
 
 function addTree(blocks: Block[], entity: DecorationEntityDefinition, y: number): void {
@@ -290,6 +410,59 @@ function addSignatureDetail(
         rotation: new Vector3(0, Math.PI * 0.25, 0),
       },
     );
+    return;
+  }
+
+  if (detail.kind === "festival-lantern") {
+    blocks.push(
+      {
+        kind: "wood",
+        position: new Vector3(x, y + 0.66, z),
+        scaling: new Vector3(0.13, 1.32, 0.13),
+      },
+      {
+        kind: "goldLight",
+        position: new Vector3(x, y + 1.32, z),
+        scaling: new Vector3(0.24, 0.32, 0.24),
+        rotation: new Vector3(0, Math.PI * 0.25, 0),
+      },
+    );
+    return;
+  }
+
+  if (detail.kind === "festival-table") {
+    blocks.push({
+      kind: "wood",
+      position: new Vector3(x, y + 0.46, z),
+      scaling: new Vector3(1.25, 0.16, 0.72),
+      rotation: new Vector3(0, rotationY, 0),
+    });
+    [-0.45, 0.45].forEach((offsetX) =>
+      blocks.push({
+        kind: "wood",
+        position: new Vector3(x + offsetX, y + 0.22, z),
+        scaling: new Vector3(0.12, 0.44, 0.12),
+      }),
+    );
+    return;
+  }
+
+  if (detail.kind === "ribbon-line") {
+    [-0.72, 0.72].forEach((offsetX) =>
+      blocks.push({
+        kind: "wood",
+        position: new Vector3(x + offsetX, y + 0.7, z),
+        scaling: new Vector3(0.1, 1.4, 0.1),
+      }),
+    );
+    for (let index = -2; index <= 2; index += 1) {
+      blocks.push({
+        kind: index % 2 === 0 ? "burgundy" : "goldLight",
+        position: new Vector3(x + index * 0.28, y + 1.2, z),
+        scaling: new Vector3(0.22, 0.08, 0.06),
+        rotation: new Vector3(0, rotationY, index * 0.08),
+      });
+    }
     return;
   }
 
@@ -496,10 +669,14 @@ export interface RenderedWorldMap {
   dispose: () => void;
 }
 
-export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedWorldMap {
+export function createWorldMap(
+  scene: Scene,
+  map: WorldMapDefinition,
+  sharedResources?: WorldRenderResources,
+): RenderedWorldMap {
   const root = new TransformNode(`${map.id}-world`, scene);
   const renderGroups = new Map<string, BlockRenderGroup>();
-  const resources = new WorldRenderResources(scene);
+  const resources = sharedResources ?? new WorldRenderResources(scene);
   const shrineObservers: Observer<Scene>[] = [];
   const push = (block: Block): void => {
     const descriptor = resolveBlockRenderKey(block);
@@ -548,10 +725,14 @@ export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedW
           scaling: new Vector3(0.55, 0.42, 0.7),
           rotation: new Vector3(0, Math.PI * 0.12, 0),
         });
-      } else {
+      } else if (entity.decorationKind === "shrine") {
         const shrine = createShrine(scene, entity, y);
         shrine.root.parent = root;
         shrineObservers.push(shrine.observer);
+      } else {
+        const decorationBlocks: Block[] = [];
+        addFestivalDecoration(decorationBlocks, entity, y);
+        decorationBlocks.forEach(push);
       }
     });
 
@@ -583,7 +764,9 @@ export function createWorldMap(scene: Scene, map: WorldMapDefinition): RenderedW
         scene.onBeforeRenderObservable.remove(observer),
       );
       root.dispose(false, false);
-      resources.dispose();
+      if (!sharedResources) {
+        resources.dispose();
+      }
     },
   };
 }

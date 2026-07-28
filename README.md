@@ -1,12 +1,13 @@
 # Střípky světla
 
-A small browser-based voxel JRPG about returning light to a fading world. The project is at
-the **pre-Wave 2 environment pass**, following the sprite-character and voxel texture
-spikes.
+A small browser-based voxel JRPG about returning light to a fading world. The project now
+contains **Wave 2 — Zmizelé stužky**, the second part of Chapter 1.
 
-The playable Wave 1 loop remains unchanged: the player meets festival steward Mila outside
-Jasnov, accepts a short task, finds a light spark near an old shrine, and returns with a
-trail pointing toward the Moss Forest.
+The playable story continues directly from Wave 1. A returned light spark awakens Puk from
+the fragment that has rested in the courier's lantern since the main lantern cracked. The
+courier then delivers a sealed festival list to ranger Rena on a second data-driven map,
+investigates missing ribbons, and makes the first persistent branch-and-fold choice about
+the wild fox Špunt.
 
 ## Stack
 
@@ -44,6 +45,7 @@ npm run assets:world
 - Move: `WASD` or arrow keys
 - Interact and advance dialogue: `E` or `Enter`
 - Dialogue can also be advanced with its action button
+- Dialogue choices: `W` / `S`, up/down arrows, mouse, then `E` or `Enter`
 - Rotate camera: mouse drag
 - Zoom: mouse wheel
 
@@ -52,6 +54,8 @@ npm run assets:world
 React mounts one canvas and renders screen-space UI. `GameRuntime` owns the Babylon engine,
 scene, render loop, input, interactions, and lifecycle. Zustand is the narrow shared bridge
 for story state, dialogue, objectives, prompts, feedback, and throttled telemetry.
+A scene-owned map manager replaces map-specific meshes and entities while retaining the
+player, camera, shared world atlas resources, Puk follower, and sky.
 
 Authored maps, visual details, entities, characters, dialogue, and objectives live in the
 typed `src/content` layer. Renderers and the interaction system consume generic definitions
@@ -129,6 +133,21 @@ configuration. The environment survives map-content disposal and is intended to 
 by both Jasnov maps; a later map-specific atmosphere can select another configuration
 without duplicating the renderer.
 
+## Wave 2 story slice
+
+- one-time lantern memory and Puk awakening;
+- smoothed non-colliding Puk follower;
+- Jasnov festival square with Rena, storehouse, stalls, ribbons, pen, and forest gate;
+- data-driven map entry points and a fade transition without reloading the app;
+- ribbon-clue inspection and a two-option dialogue choice;
+- immediate protected / handed-over branch presentation followed by a fold at the gate;
+- explicit long-term Špunt outcome and trust values;
+- versioned `localStorage` autosave with validated Continue and New Game flows;
+- restoration of map, checkpoint, one-shot entities, and the committed branch.
+
+Wave 2 ends at the opened Moss Forest gate. It does not add the forest, combat, inventory,
+or a general quest framework.
+
 ## Wave 1 gameplay foundation
 
 - data-driven Jasnov outskirts map with terrain, decorations, and collision;
@@ -142,6 +161,7 @@ without duplicating the renderer.
 
 ## Deliberate non-goals
 
-The pre-Wave 2 pass adds no quests, branching, combat, enemies, inventory, saving, audio,
-portraits, cutscenes, new maps, map transitions, gamepad support, touch controls, webfonts,
-icon packs, heavy post-processing, weather, a day/night cycle, or new gameplay systems.
+Wave 2 adds one tightly scoped story branch and one delivery beat. It deliberately adds no
+combat, enemies, HP, inventory, equipment, loot, party system, general quest log, multiple
+save slots, backend, audio, portraits, cutscene framework, gamepad, touch controls,
+post-processing, weather, or day/night cycle.

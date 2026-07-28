@@ -163,3 +163,64 @@ and visual identity boundaries without creating a full quest engine, ECS, or des
 system framework. A later Wave
 can add another NPC, a small dialogue choice, or a second map by extending the
 appropriate content and focused runtime capability.
+
+## Wave 2 runtime extension
+
+### Map manager and shared resources
+
+`MapManager` owns only the active map content. It resolves a typed map by `mapId`, validates
+an `entryPointId`, disposes the previous world root and map entities, renders the next map,
+and places the existing player at the selected entry point. `GameRuntime` keeps one engine,
+scene, render loop, camera, input manager, and player throughout the transition.
+
+The map manager owns one scene-lifetime `WorldRenderResources` cache. Atlas texture,
+atlas material, procedural block materials, and source meshes are created lazily and reused
+by both maps. Each map creates instances parented to its own disposable root. The
+scene-level sky dome, horizon ribbons, and cloud sea remain outside the map manager, so a
+transition neither recreates nor disposes them.
+
+The current transition is deliberately small: interaction lock, fade-out, map replacement,
+entry-point placement, checkpoint update, and fade-in. A failed map or entry-point lookup
+enters the existing readable error state.
+
+### Story and entity restoration
+
+`StorySnapshot` is the single progression source. It contains Chapter 1's explicit stage,
+one-shot memory and awakening fields, delivery state, the explicit `SpuntOutcome`, trust
+values, collected entities, and resolved interactions. The pure reducer rejects events
+that do not match the current stage and refuses to overwrite a committed choice.
+
+Entity conditions are evaluated from the snapshot. This makes Špunt appear behind the
+storehouse only after the clue, disappear after the choice, and reappear either in the pen
+or at the forest gate. Loading a checkpoint applies the same conditions before gameplay
+resumes.
+
+### Dialogue choices
+
+Dialogue content is a graph of typed nodes. Nodes contain text plus either one `next`
+reference or up to two choices. Choice content may carry a story outcome and conditions.
+The graph validator checks start nodes, links, unique choice IDs, invalid node shapes, and
+a reachable terminal node.
+
+Zustand stores the active dialogue and node, selected choice, and input lock. `W/S`, vertical
+arrows, mouse clicks, `E`, and `Enter` all route through the same store actions. The
+interaction press is consumed before the graph is opened, so it cannot also confirm a
+choice.
+
+### Save and start flow
+
+The V1 save is a validated `localStorage` document containing the format version, timestamp,
+current map, safe entry point, story fields, collected entity IDs, and resolved entity IDs.
+Transient position, camera, prompts, open dialogue, fades, and telemetry are excluded.
+
+Autosaves occur at story checkpoints: Puk awakened, delivery received, festival map entered,
+delivery completed, Špunt choice committed, branch folded at the gate, and Wave 2 complete.
+Continue accepts only a valid versioned and map-consistent checkpoint. New Game clears the
+single save after an in-menu confirmation.
+
+### Companion
+
+Puk is a scene-owned visual follower rather than a map entity or party member. A focused
+controller interpolates toward an offset from the player, adds a restrained bob, and never
+participates in collision, triggers, or interaction selection. It survives map replacement
+and is disposed with the scene.

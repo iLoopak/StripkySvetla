@@ -1,4 +1,8 @@
-import type { Wave1StoryStage } from "../game/story/storyTypes";
+import type {
+  ChapterOneStage,
+  SpuntOutcome,
+  StoryCondition,
+} from "../game/story/storyTypes";
 
 export interface GridPosition {
   x: number;
@@ -19,12 +23,19 @@ interface BaseEntityDefinition {
   position: GridPosition;
   facing?: number;
   collisionRadius?: number;
+  conditions?: readonly StoryCondition[];
+}
+
+export interface ConditionalDialogueDefinition {
+  dialogueId: string;
+  conditions: readonly StoryCondition[];
 }
 
 export interface NpcEntityDefinition extends BaseEntityDefinition {
   type: "npc";
   characterId: string;
-  dialogueIds: Readonly<Partial<Record<Wave1StoryStage, string>>>;
+  dialogueIds: Readonly<Partial<Record<ChapterOneStage, string>>>;
+  conditionalDialogueIds?: readonly ConditionalDialogueDefinition[];
 }
 
 export interface CollectibleEntityDefinition extends BaseEntityDefinition {
@@ -32,7 +43,17 @@ export interface CollectibleEntityDefinition extends BaseEntityDefinition {
   collectibleId: string;
 }
 
-export type DecorationKind = "tree" | "rock" | "shrine";
+export type DecorationKind =
+  | "tree"
+  | "rock"
+  | "shrine"
+  | "storehouse"
+  | "festival-stall"
+  | "crate"
+  | "pen"
+  | "forest-gate"
+  | "clue-marker"
+  | "town-gate";
 
 export interface DecorationEntityDefinition extends BaseEntityDefinition {
   type: "decoration";
@@ -43,7 +64,13 @@ export type WorldEntityDefinition =
   NpcEntityDefinition | CollectibleEntityDefinition | DecorationEntityDefinition;
 
 export type SignatureDetailKind =
-  "path-lantern" | "light-flower" | "shard-marker" | "shrine-paving";
+  | "path-lantern"
+  | "light-flower"
+  | "shard-marker"
+  | "shrine-paving"
+  | "festival-lantern"
+  | "ribbon-line"
+  | "festival-table";
 
 export interface SignatureDetailDefinition {
   id: string;
@@ -54,11 +81,29 @@ export interface SignatureDetailDefinition {
 
 export interface InteractionDefinition {
   id: string;
-  type: "dialogue" | "collect";
+  type: "dialogue" | "collect" | "inspect" | "transition";
   targetId: string;
   prompt: string;
   interactionRadius: number;
-  availableStages: readonly Wave1StoryStage[];
+  availableStages: readonly ChapterOneStage[];
+  transitionId?: string;
+  dialogueId?: string;
+  dialogueIdBySpuntOutcome?: Readonly<
+    Partial<Record<Exclude<SpuntOutcome, null>, string>>
+  >;
+}
+
+export interface MapEntryPoint {
+  id: string;
+  position: GridPosition;
+  facing?: "left" | "right";
+}
+
+export interface MapTransitionDefinition {
+  id: string;
+  targetMapId: string;
+  targetEntryPointId: string;
+  conditions?: readonly StoryCondition[];
 }
 
 export interface WorldMapDefinition {
@@ -67,6 +112,8 @@ export interface WorldMapDefinition {
   width: number;
   depth: number;
   playerSpawn: GridPosition;
+  entryPoints: readonly MapEntryPoint[];
+  transitions: readonly MapTransitionDefinition[];
   terrain: readonly TerrainCellDefinition[];
   entities: readonly WorldEntityDefinition[];
   interactions: readonly InteractionDefinition[];
@@ -82,9 +129,20 @@ export interface CharacterProportions {
   footDepth: number;
 }
 
-export type CharacterHairStyle = "courier-hood" | "festival-bun";
-export type CharacterOutfitStyle = "courier-tunic" | "festival-steward";
-export type CharacterAccessory = "scarf" | "light-pendant" | "sash" | "festival-brooch";
+export type CharacterKind = "humanoid" | "spirit" | "creature";
+export type CharacterHairStyle =
+  "courier-hood" | "festival-bun" | "ranger-braid" | "none";
+export type CharacterOutfitStyle =
+  "courier-tunic" | "festival-steward" | "ranger-coat" | "none";
+export type CharacterAccessory =
+  | "scarf"
+  | "light-pendant"
+  | "sash"
+  | "festival-brooch"
+  | "gate-key"
+  | "shoulder-wrap"
+  | "floating-shard"
+  | "ear-notch";
 
 export interface CharacterSpriteDefinition {
   assetPath: string;
@@ -96,6 +154,7 @@ export interface CharacterSpriteDefinition {
 export interface CharacterDefinition {
   id: string;
   displayName: string;
+  kind?: CharacterKind;
   sprite: CharacterSpriteDefinition;
   palette: {
     primary: string;
@@ -111,10 +170,27 @@ export interface CharacterDefinition {
   accessories: readonly CharacterAccessory[];
 }
 
+export interface DialogueChoice {
+  id: string;
+  text: string;
+  next: string;
+  outcome?: Exclude<SpuntOutcome, null>;
+  conditions?: readonly StoryCondition[];
+}
+
+export interface DialogueNode {
+  id: string;
+  speakerName?: string;
+  text: string;
+  next?: string;
+  choices?: readonly DialogueChoice[];
+}
+
 export interface DialogueDefinition {
   id: string;
   speakerName: string;
-  lines: readonly string[];
+  startNodeId: string;
+  nodes: readonly DialogueNode[];
 }
 
 export interface ObjectiveDefinition {

@@ -5,7 +5,7 @@ export function LoadingScreen() {
   const status = useGameStore((state) => state.status);
   const errorMessage = useGameStore((state) => state.errorMessage);
 
-  if (status === "ready") {
+  if (status === "ready" || status === "idle") {
     return null;
   }
 

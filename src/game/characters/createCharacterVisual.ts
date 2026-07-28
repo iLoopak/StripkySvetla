@@ -14,7 +14,7 @@ export function createCharacterVisual(
   instanceName = definition.id,
   rendererMode: CharacterRendererMode = characterRendererMode,
 ): CharacterVisual {
-  return rendererMode === "blocky"
+  return rendererMode === "blocky" && (definition.kind ?? "humanoid") === "humanoid"
     ? createBlockCharacter(scene, definition, instanceName)
     : createSpriteCharacter(scene, definition, instanceName);
 }
